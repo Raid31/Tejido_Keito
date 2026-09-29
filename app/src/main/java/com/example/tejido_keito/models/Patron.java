@@ -1,4 +1,4 @@
-package com.example.tejido_keito;
+package com.example.tejido_keito.models;
 
 public class Patron {
 

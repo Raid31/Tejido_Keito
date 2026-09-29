@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Tejido_Keito">
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -22,7 +22,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".BibliotecaActivity"
+            android:name=".activities.BibliotecaActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".activities.LoginActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".activities.RegistroActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>

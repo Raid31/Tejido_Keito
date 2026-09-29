@@ -1,9 +1,12 @@
-package com.example.tejido_keito;
+package com.example.tejido_keito.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.tejido_keito.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -12,10 +15,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button btnComenzar = findViewById(R.id.btnComenzar);
+        Button btnComenzar = findViewById(R.id.btnIniciarSesion);
 
         btnComenzar.setOnClickListener(v -> {
-            Toast.makeText(this, "¡Bienvenida a Keito!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
         });
     }
 }
