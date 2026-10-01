@@ -5,6 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/keito_lavanda"
+    android:padding="20dp"
     tools:context=".activities.BibliotecaActivity">
 
     <TextView
@@ -12,20 +14,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Biblioteca de patrones"
+        android:textColor="@color/keito_texto"
         android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvPatrones"
-        android:layout_width="409dp"
-        android:layout_height="699dp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <EditText
+        android:id="@+id/etBuscar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="Buscar patrón..."
+        android:inputType="text"
+        android:textColor="@color/keito_texto"
+        android:textColorHint="@color/keito_morado"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPatrones"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etBuscar"
+        app:layout_constraintVertical_bias="0.0" />
 </androidx.constraintlayout.widget.ConstraintLayout>

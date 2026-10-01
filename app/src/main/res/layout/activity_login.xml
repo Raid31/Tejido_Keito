@@ -8,7 +8,7 @@
     android:background="@color/keito_lavanda"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="25dp"
     tools:context=".activities.LoginActivity">
 
     <TextView
@@ -26,7 +26,9 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="Correo electrónico"
-        android:inputType="textEmailAddress" />
+        android:inputType="textEmailAddress"
+        android:textColor="@color/keito_texto"
+        android:textColorHint="@color/keito_morado" />
 
     <EditText
         android:id="@+id/etContrasena"
@@ -34,7 +36,9 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="Contraseña"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        android:textColor="@color/keito_texto"
+        android:textColorHint="@color/keito_morado" />
 
     <Button
         android:id="@+id/btnEntrar"
