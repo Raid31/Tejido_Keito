@@ -90,6 +90,35 @@
                 android:textColor="@color/keito_texto"
                 android:textSize="15sp" />
 
+            <TextView
+                android:id="@+id/tvMultimedia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Multimedia"
+                android:textColor="@color/keito_morado"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnAudio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Escuchar audio" />
+
+            <Button
+                android:id="@+id/btnVideo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ver video" />
+
+            <VideoView
+                android:id="@+id/vvTutorial"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp" />
+
             <Button
                 android:id="@+id/btnEmpezarTejer"
                 android:layout_width="match_parent"
