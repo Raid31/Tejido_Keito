@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/menu_progreso"
+            android:title="Mi progreso" />
+        <item
+            android:id="@+id/menu_favoritos"
+            android:title="Favoritos" />
+        <item
+            android:id="@+id/menu_cerrar_sesion"
+            android:title="Cerrar sesión" />
+    </group>
+</menu>

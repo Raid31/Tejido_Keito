@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/keito_lavanda"
@@ -31,14 +32,25 @@
     <Button
         android:id="@+id/btnIniciarSesion"
         android:layout_width="260dp"
-        android:layout_height="wrap_content"
-        android:text="Iniciar sesión" />
+        android:layout_height="56dp"
+        android:backgroundTint="@color/keito_morado"
+        android:text="Iniciar sesión"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:cornerRadius="16dp" />
 
     <Button
         android:id="@+id/btnRegistrarse"
         style="@style/Widget.Material3.Button.OutlinedButton"
         android:layout_width="260dp"
-        android:layout_height="wrap_content"
-        android:text="Registrarse" />
+        android:layout_height="56dp"
+        android:layout_marginTop="12dp"
+        android:text="Registrarse"
+        android:textAllCaps="false"
+        android:textColor="@color/keito_morado"
+        android:textSize="16sp"
+        app:cornerRadius="16dp"
+        app:strokeColor="@color/keito_morado" />
 
 </LinearLayout>

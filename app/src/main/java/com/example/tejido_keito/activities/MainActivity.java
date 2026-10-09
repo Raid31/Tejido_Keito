@@ -7,18 +7,33 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tejido_keito.R;
+import com.example.tejido_keito.utils.SessionManager;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SessionManager session = new SessionManager(this);
+        if (session.estaLogueado()){
+            startActivity(new Intent(MainActivity.this, BibliotecaActivity.class));
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_main);
 
-        Button btnComenzar = findViewById(R.id.btnIniciarSesion);
+        Button btnIniciarSesion = findViewById(R.id.btnIniciarSesion);
+        Button btnRegistrarse = findViewById(R.id.btnRegistrarse);
 
-        btnComenzar.setOnClickListener(v -> {
+        btnIniciarSesion.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+        });
+
+        btnRegistrarse.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, RegistroActivity.class);
             startActivity(intent);
         });
     }

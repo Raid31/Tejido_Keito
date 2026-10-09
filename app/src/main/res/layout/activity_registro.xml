@@ -1,79 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/keito_lavanda"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="25dp"
+    android:fillViewport="true"
     tools:context=".activities.RegistroActivity">
 
-    <TextView
-        android:id="@+id/textView3"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:text="Crear cuenta"
-        android:textColor="@color/keito_morado_oscuro"
-        android:textSize="28sp"
-        android:textStyle="bold" />
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="25dp">
 
-    <EditText
-        android:id="@+id/etNombre"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Nombre"
-        android:inputType="text"
-        android:textColor="@color/keito_texto"
-        android:textColorHint="@color/keito_morado" />
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="Crear cuenta"
+            android:textColor="@color/keito_morado_oscuro"
+            android:textSize="28sp"
+            android:textStyle="bold" />
 
-    <EditText
-        android:id="@+id/etCorreoRegistro"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Correo electrónico"
-        android:inputType="textEmailAddress"
-        android:textColor="@color/keito_texto"
-        android:textColorHint="@color/keito_morado" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nombre"
+            android:textColorHint="@color/keito_morado"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/keito_morado"
+            app:hintTextColor="@color/keito_morado">
 
-    <EditText
-        android:id="@+id/etContrasenaRegistro"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Contraseña"
-        android:inputType="textPassword"
-        android:textColor="@color/keito_texto"
-        android:textColorHint="@color/keito_morado" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:textColor="@color/keito_texto" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <EditText
-        android:id="@+id/etConfirmarContrasena"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Confirmar contraseña"
-        android:inputType="textPassword"
-        android:textColor="@color/keito_texto"
-        android:textColorHint="@color/keito_morado" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Correo electrónico"
+            android:textColorHint="@color/keito_morado"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/keito_morado"
+            app:hintTextColor="@color/keito_morado">
 
-    <Button
-        android:id="@+id/btnCrearCuenta"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Crear cuenta" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCorreoRegistro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:textColor="@color/keito_texto" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:id="@+id/tvIrLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="¿Ya tienes cuenta? Inicia sesión"
-        android:textAlignment="center"
-        android:textColor="@color/keito_morado" />
-</LinearLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Contraseña"
+            android:textColorHint="@color/keito_morado"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/keito_morado"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/keito_morado"
+            app:hintTextColor="@color/keito_morado">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etContrasenaRegistro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@color/keito_texto" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Confirmar contraseña"
+            android:textColorHint="@color/keito_morado"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/keito_morado"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/keito_morado"
+            app:hintTextColor="@color/keito_morado">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etConfirmarContrasena"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@color/keito_texto" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/btnCrearCuenta"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/keito_morado"
+            android:text="Crear cuenta"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:cornerRadius="16dp" />
+
+        <TextView
+            android:id="@+id/tvIrLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="¿Ya tienes cuenta? Inicia sesión"
+            android:textAlignment="center"
+            android:textColor="@color/keito_morado" />
+    </LinearLayout>
+</ScrollView>
