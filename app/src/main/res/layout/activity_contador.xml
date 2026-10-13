@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/keito_lavanda"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="20dp"
+    tools:context=".activities.ContadorActivity">
+
+    <TextView
+        android:id="@+id/tvNombreContador"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Patrón"
+        android:textColor="@color/keito_morado_oscuro"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvVueltaActual"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="0"
+        android:textColor="@color/keito_morado_oscuro"
+        android:textSize="72sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvDeTotal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="de 0 vueltas"
+        android:textColor="@color/keito_texto"
+        android:textSize="16sp" />
+
+    <ProgressBar
+        android:id="@+id/progressVueltas"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="12dp"
+        android:layout_marginTop="12dp"
+        android:progressBackgroundTint="#D4C8F0"
+        android:progressTint="@color/keito_morado" />
+
+    <!-- Instrucciones con scroll: ocupan todo el espacio que sobra -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:layout_weight="1"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="2dp">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tvInstruccionesContador"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="5dp"
+                android:padding="16dp"
+                android:text="Instrucciones"
+                android:textColor="@color/keito_texto"
+                android:textSize="15sp" />
+        </ScrollView>
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnMenos"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="Restar"
+            android:textAllCaps="false"
+            android:textColor="@color/keito_morado"
+            android:textSize="16sp"
+            app:cornerRadius="16dp"
+            app:strokeColor="@color/keito_morado" />
+
+        <Button
+            android:id="@+id/btnMas"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="2"
+            android:backgroundTint="@color/keito_morado"
+            android:text="+1 vuelta"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            app:cornerRadius="16dp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnVoz"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="10dp"
+        android:text="Activar voz"
+        android:textAllCaps="false"
+        android:textColor="@color/keito_morado"
+        android:textSize="16sp"
+        app:cornerRadius="16dp"
+        app:strokeColor="@color/keito_morado" />
+
+    <TextView
+        android:id="@+id/tvEstadoVoz"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:text="Voz desactivada"
+        android:textColor="@color/keito_texto"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnAbreviaciones"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Abreviaciones"
+            android:textAllCaps="false"
+            android:textColor="@color/keito_morado" />
+
+        <Button
+            android:id="@+id/btnReiniciar"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Reiniciar contador"
+            android:textAllCaps="false"
+            android:textColor="@color/keito_morado" />
+    </LinearLayout>
+</LinearLayout>

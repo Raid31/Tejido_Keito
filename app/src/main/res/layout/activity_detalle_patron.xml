@@ -12,7 +12,8 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -29,7 +30,7 @@
                 <ImageView
                     android:id="@+id/ivDetalle"
                     android:layout_width="match_parent"
-                    android:layout_height="240dp"
+                    android:layout_height="340dp"
                     android:scaleType="centerCrop"
                     app:srcCompat="@drawable/placeholder_patron" />
             </androidx.cardview.widget.CardView>
@@ -48,22 +49,22 @@
                 android:id="@+id/tvDificultadDetalle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:text="Dificultad"
                 android:textColor="@color/keito_texto"
-                android:textSize="16sp" />
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/tvVueltasDetalle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="20dp"
                 android:text="Vueltas"
                 android:textColor="@color/keito_texto"
-                android:textSize="16sp" />
+                android:textSize="20sp" />
 
-            <!-- Tarjeta de abreviaciones -->
+            <!-- Abreviaciones (se despliega al tocar) -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -76,35 +77,57 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tvTituloAbreviaciones"
+                    <LinearLayout
+                        android:id="@+id/headerAbreviaciones"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Abreviaciones"
-                        android:textColor="@color/keito_morado"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Abreviaciones"
+                            android:textColor="@color/keito_morado"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvFlechaAbreviaciones"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="▼"
+                            android:textColor="@color/keito_morado"
+                            android:textSize="16sp" />
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/tvAbreviaciones"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
                         android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="16dp"
                         android:text="Abreviaciones"
                         android:textColor="@color/keito_texto"
-                        android:textSize="15sp" />
+                        android:textSize="15sp"
+                        android:visibility="gone" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Tarjeta de instrucciones -->
+            <!-- Instrucciones (se despliega al tocar) -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="8dp"
                 app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
@@ -113,41 +136,65 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tvTituloInstrucciones"
+                    <LinearLayout
+                        android:id="@+id/headerInstrucciones"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Instrucciones"
-                        android:textColor="@color/keito_morado"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Instrucciones"
+                            android:textColor="@color/keito_morado"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvFlechaInstrucciones"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="▼"
+                            android:textColor="@color/keito_morado"
+                            android:textSize="16sp" />
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/tvInstrucciones"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
                         android:lineSpacingExtra="6dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="16dp"
                         android:text="Instrucciones"
                         android:textColor="@color/keito_texto"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:visibility="gone" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <Button
-                android:id="@+id/btnEmpezarTejer"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginBottom="8dp"
-                android:backgroundTint="@color/keito_morado"
-                android:text="Empezar a tejer"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                app:cornerRadius="16dp" />
         </LinearLayout>
     </ScrollView>
+
+    <!-- Botón fijo abajo: siempre visible -->
+    <Button
+        android:id="@+id/btnEmpezarTejer"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="@color/keito_morado"
+        android:text="Empezar a tejer"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:cornerRadius="16dp" />
 </LinearLayout>
