@@ -10,9 +10,14 @@ import com.example.tejido_keito.database.KeitoContract.PatronEntry;
 import com.example.tejido_keito.database.KeitoContract.ProgresoEntry;
 import com.example.tejido_keito.database.KeitoContract.UsuarioEntry;
 import com.example.tejido_keito.models.Patron;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class KeitoDbHelper extends SQLiteOpenHelper {
 
@@ -244,5 +249,107 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
             db.close();
         }
         return lista;
+    }
+
+    // ---------- Progreso ----------
+
+    // Guarda la vuelta actual de un usuario en un patrón (crea el registro o lo actualiza)
+    public void guardarProgreso(long usuarioId, int patronId, int vueltaActual) {
+        SQLiteDatabase db = getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(ProgresoEntry.COLUMN_VUELTA_ACTUAL, vueltaActual);
+            values.put(ProgresoEntry.COLUMN_ULTIMA_ACTUALIZACION, fechaActual());
+
+            String where = ProgresoEntry.COLUMN_USUARIO_ID + " = ? AND " +
+                    ProgresoEntry.COLUMN_PATRON_ID + " = ?";
+            String[] args = { String.valueOf(usuarioId), String.valueOf(patronId) };
+
+            // Primero intenta actualizar; si no existía el registro, lo inserta
+            int filas = db.update(ProgresoEntry.TABLE_NAME, values, where, args);
+            if (filas == 0) {
+                values.put(ProgresoEntry.COLUMN_USUARIO_ID, usuarioId);
+                values.put(ProgresoEntry.COLUMN_PATRON_ID, patronId);
+                db.insert(ProgresoEntry.TABLE_NAME, null, values);
+            }
+        } finally {
+            db.close();
+        }
+    }
+
+    // Devuelve la vuelta guardada de un usuario en un patrón (0 si nunca empezó)
+    public int obtenerProgreso(long usuarioId, int patronId) {
+        SQLiteDatabase db = getReadableDatabase();
+        String[] projection = { ProgresoEntry.COLUMN_VUELTA_ACTUAL };
+        String selection = ProgresoEntry.COLUMN_USUARIO_ID + " = ? AND " +
+                ProgresoEntry.COLUMN_PATRON_ID + " = ?";
+        String[] selectionArgs = { String.valueOf(usuarioId), String.valueOf(patronId) };
+
+        int vuelta = 0;
+        Cursor cursor = null;
+        try {
+            cursor = db.query(ProgresoEntry.TABLE_NAME, projection, selection,
+                    selectionArgs, null, null, null);
+            if (cursor.moveToFirst()) {
+                vuelta = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(ProgresoEntry.COLUMN_VUELTA_ACTUAL));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+        return vuelta;
+    }
+
+    private String fechaActual() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                .format(new Date());
+    }
+
+    // Devuelve un mapa patronId -> vuelta actual, solo de los patrones que el usuario ya empezo
+    public Map<Integer, Integer> obtenerProgresoUsuario(long usuarioId) {
+        SQLiteDatabase db = getReadableDatabase();
+        String[] projection = {
+                ProgresoEntry.COLUMN_PATRON_ID,
+                ProgresoEntry.COLUMN_VUELTA_ACTUAL
+        };
+        String selection = ProgresoEntry.COLUMN_USUARIO_ID + " = ? AND " +
+                ProgresoEntry.COLUMN_VUELTA_ACTUAL + " > 0";
+        String[] selectionArgs = { String.valueOf(usuarioId) };
+
+        Map<Integer, Integer> progresos = new HashMap<>();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(ProgresoEntry.TABLE_NAME, projection, selection,
+                    selectionArgs, null, null, null);
+            while (cursor.moveToNext()) {
+                int patronId = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(ProgresoEntry.COLUMN_PATRON_ID));
+                int vuelta = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(ProgresoEntry.COLUMN_VUELTA_ACTUAL));
+                progresos.put(patronId, vuelta);
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+        return progresos;
+    }
+
+    // Elimina el progreso de un usuario en un patran (devuelve cuántas filas borro)
+    public int eliminarProgreso(long usuarioId, int patronId) {
+        SQLiteDatabase db = getWritableDatabase();
+        try {
+            String where = ProgresoEntry.COLUMN_USUARIO_ID + " = ? AND " +
+                    ProgresoEntry.COLUMN_PATRON_ID + " = ?";
+            String[] args = { String.valueOf(usuarioId), String.valueOf(patronId) };
+            return db.delete(ProgresoEntry.TABLE_NAME, where, args);
+        } finally {
+            db.close();
+        }
     }
 }

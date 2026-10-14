@@ -89,7 +89,7 @@ public class BibliotecaActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.menu_progreso) {
-                Toast.makeText(this, "Mi progreso: próximamente", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(BibliotecaActivity.this, ProgresoActivity.class));
             } else if (id == R.id.menu_favoritos) {
                 Toast.makeText(this, "Favoritos: próximamente", Toast.LENGTH_SHORT).show();
             } else if (id == R.id.menu_cerrar_sesion) {

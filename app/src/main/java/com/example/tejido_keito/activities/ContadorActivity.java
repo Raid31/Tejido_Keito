@@ -25,7 +25,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.tejido_keito.R;
+import com.example.tejido_keito.database.KeitoDbHelper;
 import com.example.tejido_keito.utils.FormatoTexto;
+import com.example.tejido_keito.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +50,11 @@ public class ContadorActivity extends AppCompatActivity {
 
     private int vueltaActual = 0;
     private int totalVueltas;
+
+    // Para guardar el progreso en SQLite
+    private KeitoDbHelper dbHelper;
+    private int patronId;
+    private long usuarioId;
 
     private TextView tvVueltaActual;
     private TextView tvDeTotal;
@@ -96,18 +103,29 @@ public class ContadorActivity extends AppCompatActivity {
         String nombre = intent.getStringExtra("nombre");
         String abreviaciones = intent.getStringExtra("abreviaciones");
         String instrucciones = intent.getStringExtra("instrucciones");
+        patronId = intent.getIntExtra("id", -1);
         totalVueltas = intent.getIntExtra("totalVueltas", 1);
         if (totalVueltas <= 0) {
             totalVueltas = 1;
         }
 
+        // Usuario con la sesión abierta
+        dbHelper = new KeitoDbHelper(this);
+        usuarioId = new SessionManager(this).getUsuarioId();
+
         tvNombreContador.setText(nombre);
         tvInstruccionesContador.setText(FormatoTexto.instrucciones(this, instrucciones));
         progressVueltas.setMax(totalVueltas);
 
-        // Recuperar la vuelta si se giró la pantalla
+        // Recuperar la vuelta: si se giró la pantalla, del estado; si no, de la base de datos
         if (savedInstanceState != null) {
             vueltaActual = savedInstanceState.getInt("vuelta", 0);
+        } else if (puedeGuardar()) {
+            vueltaActual = Math.min(dbHelper.obtenerProgreso(usuarioId, patronId), totalVueltas);
+            if (vueltaActual > 0) {
+                Toast.makeText(this, "Retomando en la vuelta " + vueltaActual,
+                        Toast.LENGTH_SHORT).show();
+            }
         }
         actualizarUi();
 
@@ -136,6 +154,7 @@ public class ContadorActivity extends AppCompatActivity {
                         .setPositiveButton("Reiniciar", (dialog, which) -> {
                             vueltaActual = 0;
                             actualizarUi();
+                            guardarProgreso();
                         })
                         .setNegativeButton("Cancelar", null)
                         .show());
@@ -147,6 +166,7 @@ public class ContadorActivity extends AppCompatActivity {
         if (vueltaActual < totalVueltas) {
             vueltaActual++;
             actualizarUi();
+            guardarProgreso();
             tvVueltaActual.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
 
             if (vueltaActual == totalVueltas) {
@@ -161,6 +181,7 @@ public class ContadorActivity extends AppCompatActivity {
         if (vueltaActual > 0) {
             vueltaActual--;
             actualizarUi();
+            guardarProgreso();
             tvVueltaActual.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
         }
     }
@@ -169,6 +190,18 @@ public class ContadorActivity extends AppCompatActivity {
         tvVueltaActual.setText(String.valueOf(vueltaActual));
         tvDeTotal.setText("de " + totalVueltas + " vueltas");
         progressVueltas.setProgress(vueltaActual);
+    }
+
+    // ---------------- Progreso (SQLite) ----------------
+
+    private boolean puedeGuardar() {
+        return patronId != -1 && usuarioId != -1;
+    }
+
+    private void guardarProgreso() {
+        if (puedeGuardar()) {
+            dbHelper.guardarProgreso(usuarioId, patronId, vueltaActual);
+        }
     }
 
     // ---------------- Pitidos ----------------
@@ -374,6 +407,9 @@ public class ContadorActivity extends AppCompatActivity {
         if (recognizer != null) {
             recognizer.destroy();
             recognizer = null;
+        }
+        if (dbHelper != null) {
+            dbHelper.close();
         }
     }
 }

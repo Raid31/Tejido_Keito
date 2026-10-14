@@ -40,6 +40,7 @@ public class PatronAdapter extends RecyclerView.Adapter<PatronAdapter.PatronView
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), DetallePatronActivity.class);
+            intent.putExtra("id", patronActual.getId());
             intent.putExtra("nombre", patronActual.getNombre());
             intent.putExtra("dificultad", patronActual.getDificultad());
             intent.putExtra("totalVueltas", patronActual.getTotalVueltas());

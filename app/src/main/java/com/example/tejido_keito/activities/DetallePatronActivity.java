@@ -34,6 +34,7 @@ public class DetallePatronActivity extends AppCompatActivity {
         int imagenResId = intent.getIntExtra("imagenResId", R.drawable.placeholder_patron);
         String abreviaciones = intent.getStringExtra("abreviaciones");
         String instrucciones = intent.getStringExtra("instrucciones");
+        int patronId = intent.getIntExtra("id", -1);
 
         ivDetalle.setImageResource(imagenResId);
         tvNombreDetalle.setText(nombre);
@@ -55,6 +56,7 @@ public class DetallePatronActivity extends AppCompatActivity {
 
         btnEmpezarTejer.setOnClickListener(v -> {
             Intent intentContador = new Intent(DetallePatronActivity.this, ContadorActivity.class);
+            intentContador.putExtra("id", patronId);
             intentContador.putExtra("nombre", nombre);
             intentContador.putExtra("totalVueltas", totalVueltas);
             intentContador.putExtra("abreviaciones", abreviaciones);
