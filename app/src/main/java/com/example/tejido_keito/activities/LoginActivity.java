@@ -13,12 +13,18 @@ import com.example.tejido_keito.R;
 import com.example.tejido_keito.database.KeitoDbHelper;
 import com.example.tejido_keito.utils.SessionManager;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etCorreo;
     private EditText etContrasena;
     private KeitoDbHelper dbHelper;
     private SessionManager sesion;
+
+    // Hilo secundario para las consultas a la base de datos
+    private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,22 +55,37 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // Consultar en SQLite: devuelve el id del usuario o -1
-            long usuarioId = dbHelper.validarLogin(correo, contrasena);
-            if (usuarioId == -1) {
-                Toast.makeText(this, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            // Evita que se toque dos veces mientras se consulta
+            btnEntrar.setEnabled(false);
 
-            // Guardar la sesión para que siga abierta al cerrar la app
-            sesion.guardarSesion(usuarioId, correo);
+            ejecutor.execute(() -> {
+                // --- Hilo secundario: consultar en SQLite (devuelve el id del usuario o -1) ---
+                long usuarioId = dbHelper.validarLogin(correo, contrasena);
 
-            // Entrar a la Biblioteca y borrar las pantallas anteriores:
-            // así el botón Atrás no vuelve al Login
-            Intent intent = new Intent(LoginActivity.this, BibliotecaActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+                // --- Hilo principal: reaccionar al resultado ---
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) {
+                        return;
+                    }
+
+                    if (usuarioId == -1) {
+                        btnEntrar.setEnabled(true);
+                        Toast.makeText(this, "Correo o contraseña incorrectos",
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Guardar la sesión para que siga abierta al cerrar la app
+                    sesion.guardarSesion(usuarioId, correo);
+
+                    // Entrar a la Biblioteca y borrar las pantallas anteriores:
+                    // así el botón Atrás no vuelve al Login
+                    Intent intent = new Intent(LoginActivity.this, BibliotecaActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                });
+            });
         });
 
         tvIrRegistro.setOnClickListener(v -> {
@@ -76,6 +97,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        ejecutor.shutdown();
         if (dbHelper != null) {
             dbHelper.close();
         }

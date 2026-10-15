@@ -27,16 +27,21 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class BibliotecaActivity extends AppCompatActivity {
 
     private KeitoDbHelper dbHelper;
     private SessionManager sesion;
-    private List<Patron> listaPatrones;
+    private List<Patron> listaPatrones = new ArrayList<>();
     private PatronAdapter adapter;
     private EditText etBuscar;
     private RadioGroup rgDificultad;
     private DrawerLayout drawerLayout;
+
+    // Hilo secundario para las consultas a la base de datos
+    private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,13 +51,13 @@ public class BibliotecaActivity extends AppCompatActivity {
         dbHelper = new KeitoDbHelper(this);
         sesion = new SessionManager(this);
 
-        //Lista de patrones desde SQLite
-        listaPatrones = dbHelper.obtenerPatrones();
-
         RecyclerView rvPatrones = findViewById(R.id.rvPatrones);
         rvPatrones.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new PatronAdapter(listaPatrones);
+        adapter = new PatronAdapter(new ArrayList<>());
         rvPatrones.setAdapter(adapter);
+
+        // Lista de patrones desde SQLite (en segundo plano)
+        cargarPatrones();
 
         //Buscador + filtro por dificultad
         etBuscar = findViewById(R.id.etBuscar);
@@ -114,6 +119,21 @@ public class BibliotecaActivity extends AppCompatActivity {
         });
     }
 
+    // Lee los patrones en un hilo secundario y los muestra al terminar
+    private void cargarPatrones() {
+        ejecutor.execute(() -> {
+            List<Patron> patrones = dbHelper.obtenerPatrones();
+
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                listaPatrones = patrones;
+                filtrar();   // aplica lo que haya escrito/seleccionado (por defecto, todos)
+            });
+        });
+    }
+
     // Aplica buscador + dificultad al mismo tiempo
     private void filtrar() {
         String texto = etBuscar.getText().toString().toLowerCase().trim();
@@ -155,6 +175,7 @@ public class BibliotecaActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        ejecutor.shutdown();
         if (dbHelper != null) {
             dbHelper.close();
         }

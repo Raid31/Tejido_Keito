@@ -20,6 +20,8 @@ import com.example.tejido_keito.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ProgresoActivity extends AppCompatActivity {
 
@@ -28,6 +30,9 @@ public class ProgresoActivity extends AppCompatActivity {
     private TextView tvVacio;
     private RecyclerView rvProgreso;
     private long usuarioId;
+
+    // Hilo secundario para las consultas a la base de datos
+    private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,21 +68,30 @@ public class ProgresoActivity extends AppCompatActivity {
     }
 
     private void cargarProgreso() {
-        Map<Integer, Integer> progresos = dbHelper.obtenerProgresoUsuario(usuarioId);
-        List<Patron> todos = dbHelper.obtenerPatrones();
+        ejecutor.execute(() -> {
+            // --- Hilo secundario: consultas a la base ---
+            Map<Integer, Integer> progresos = dbHelper.obtenerProgresoUsuario(usuarioId);
+            List<Patron> todos = dbHelper.obtenerPatrones();
 
-        List<Patron> empezados = new ArrayList<>();
-        for (Patron p : todos) {
-            if (progresos.containsKey(p.getId())) {
-                empezados.add(p);
+            List<Patron> empezados = new ArrayList<>();
+            for (Patron p : todos) {
+                if (progresos.containsKey(p.getId())) {
+                    empezados.add(p);
+                }
             }
-        }
 
-        adapter.actualizar(empezados, progresos);
+            // --- Hilo principal: actualizar la pantalla ---
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                adapter.actualizar(empezados, progresos);
 
-        boolean vacio = empezados.isEmpty();
-        tvVacio.setVisibility(vacio ? View.VISIBLE : View.GONE);
-        rvProgreso.setVisibility(vacio ? View.GONE : View.VISIBLE);
+                boolean vacio = empezados.isEmpty();
+                tvVacio.setVisibility(vacio ? View.VISIBLE : View.GONE);
+                rvProgreso.setVisibility(vacio ? View.GONE : View.VISIBLE);
+            });
+        });
     }
 
     private void abrirContador(Patron patron) {
@@ -94,11 +108,16 @@ public class ProgresoActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Quitar de mi progreso")
                 .setMessage("Se borrará tu avance en «" + patron.getNombre() + "». ¿Continuar?")
-                .setPositiveButton("Quitar", (dialog, which) -> {
+                .setPositiveButton("Quitar", (dialog, which) -> ejecutor.execute(() -> {
                     dbHelper.eliminarProgreso(usuarioId, patron.getId());
-                    Toast.makeText(this, "Progreso eliminado", Toast.LENGTH_SHORT).show();
-                    cargarProgreso();
-                })
+                    runOnUiThread(() -> {
+                        if (isFinishing() || isDestroyed()) {
+                            return;
+                        }
+                        Toast.makeText(this, "Progreso eliminado", Toast.LENGTH_SHORT).show();
+                        cargarProgreso();
+                    });
+                }))
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
@@ -106,6 +125,7 @@ public class ProgresoActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        ejecutor.shutdown();
         if (dbHelper != null) {
             dbHelper.close();
         }

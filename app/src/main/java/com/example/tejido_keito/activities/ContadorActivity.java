@@ -23,6 +23,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.example.tejido_keito.R;
 import com.example.tejido_keito.database.KeitoDbHelper;
@@ -55,6 +57,8 @@ public class ContadorActivity extends AppCompatActivity {
     private KeitoDbHelper dbHelper;
     private int patronId;
     private long usuarioId;
+    // Hilo secundario para las consultas a la base de datos
+    private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
     private TextView tvVueltaActual;
     private TextView tvDeTotal;
@@ -121,11 +125,7 @@ public class ContadorActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             vueltaActual = savedInstanceState.getInt("vuelta", 0);
         } else if (puedeGuardar()) {
-            vueltaActual = Math.min(dbHelper.obtenerProgreso(usuarioId, patronId), totalVueltas);
-            if (vueltaActual > 0) {
-                Toast.makeText(this, "Retomando en la vuelta " + vueltaActual,
-                        Toast.LENGTH_SHORT).show();
-            }
+            cargarProgresoGuardado();
         }
         actualizarUi();
 
@@ -198,9 +198,28 @@ public class ContadorActivity extends AppCompatActivity {
         return patronId != -1 && usuarioId != -1;
     }
 
+    // Lee la vuelta guardada en segundo plano y la muestra al terminar
+    private void cargarProgresoGuardado() {
+        ejecutor.execute(() -> {
+            int guardada = Math.min(dbHelper.obtenerProgreso(usuarioId, patronId), totalVueltas);
+            runOnUiThread(() -> {
+                // Si ya sumaste una vuelta antes de que llegara el dato, no lo pisamos
+                if (isFinishing() || isDestroyed() || guardada <= 0 || vueltaActual != 0) {
+                    return;
+                }
+                vueltaActual = guardada;
+                actualizarUi();
+                Toast.makeText(this, "Retomando en la vuelta " + vueltaActual,
+                        Toast.LENGTH_SHORT).show();
+            });
+        });
+    }
+
+    // Guarda en segundo plano (el executor es de un solo hilo, así que respeta el orden)
     private void guardarProgreso() {
         if (puedeGuardar()) {
-            dbHelper.guardarProgreso(usuarioId, patronId, vueltaActual);
+            final int vuelta = vueltaActual;
+            ejecutor.execute(() -> dbHelper.guardarProgreso(usuarioId, patronId, vuelta));
         }
     }
 
@@ -408,6 +427,7 @@ public class ContadorActivity extends AppCompatActivity {
             recognizer.destroy();
             recognizer = null;
         }
+        ejecutor.shutdown();
         if (dbHelper != null) {
             dbHelper.close();
         }

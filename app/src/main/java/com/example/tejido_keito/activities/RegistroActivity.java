@@ -13,6 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.tejido_keito.R;
 import com.example.tejido_keito.database.KeitoDbHelper;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class RegistroActivity extends AppCompatActivity {
 
     private EditText etNombre;
@@ -20,6 +23,9 @@ public class RegistroActivity extends AppCompatActivity {
     private EditText etContrasenaRegistro;
     private EditText etConfirmarContrasena;
     private KeitoDbHelper dbHelper;
+
+    // Hilo secundario para las consultas a la base de datos
+    private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,15 +67,30 @@ public class RegistroActivity extends AppCompatActivity {
                 return;
             }
 
-            // Guardar el usuario en SQLite (devuelve -1 si el correo ya existe)
-            long resultado = dbHelper.insertarUsuario(nombre, correo, contrasena);
-            if (resultado == -1) {
-                Toast.makeText(this, "Ese correo ya está registrado", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            // Evita crear la cuenta dos veces si se toca el botón rápido
+            btnCrearCuenta.setEnabled(false);
 
-            Toast.makeText(this, "Cuenta creada, inicia sesión", Toast.LENGTH_SHORT).show();
-            irALogin(correo);
+            ejecutor.execute(() -> {
+                // --- Hilo secundario: guardar en SQLite (devuelve -1 si el correo ya existe) ---
+                long resultado = dbHelper.insertarUsuario(nombre, correo, contrasena);
+
+                // --- Hilo principal: reaccionar al resultado ---
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) {
+                        return;
+                    }
+
+                    if (resultado == -1) {
+                        btnCrearCuenta.setEnabled(true);
+                        Toast.makeText(this, "Ese correo ya está registrado",
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    Toast.makeText(this, "Cuenta creada, inicia sesión", Toast.LENGTH_SHORT).show();
+                    irALogin(correo);
+                });
+            });
         });
 
         tvIrLogin.setOnClickListener(v -> irALogin(null));
@@ -89,6 +110,7 @@ public class RegistroActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        ejecutor.shutdown();
         if (dbHelper != null) {
             dbHelper.close();
         }
