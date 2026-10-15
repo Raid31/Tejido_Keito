@@ -14,6 +14,14 @@ public final class KeitoContract {
         public static final String COLUMN_PASSWORD = "password";
     }
 
+    // tabla videos
+    public static class TutorialEntry implements BaseColumns {
+        public static final String TABLE_NAME = "tutoriales";
+        public static final String COLUMN_TITULO = "titulo";
+        public static final String COLUMN_DESCRIPCION = "descripcion";
+        public static final String COLUMN_VIDEO = "video";   // nombre del archivo en res/raw
+    }
+
     // Tabla de patrones
     public static class PatronEntry implements BaseColumns {
         public static final String TABLE_NAME = "patrones";

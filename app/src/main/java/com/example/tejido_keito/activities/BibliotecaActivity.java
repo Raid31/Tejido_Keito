@@ -95,6 +95,8 @@ public class BibliotecaActivity extends AppCompatActivity {
 
             if (id == R.id.menu_progreso) {
                 startActivity(new Intent(BibliotecaActivity.this, ProgresoActivity.class));
+            } else if (id == R.id.menu_tutoriales) {
+                startActivity(new Intent(BibliotecaActivity.this, TutorialesActivity.class));
             } else if (id == R.id.menu_favoritos) {
                 Toast.makeText(this, "Favoritos: próximamente", Toast.LENGTH_SHORT).show();
             } else if (id == R.id.menu_cerrar_sesion) {

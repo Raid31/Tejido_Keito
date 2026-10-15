@@ -5,6 +5,10 @@
             android:id="@+id/menu_progreso"
             android:title="Mi progreso" />
         <item
+            android:id="@+id/menu_tutoriales"
+            android:icon="@android:drawable/ic_media_play"
+            android:title="Tutoriales" />
+        <item
             android:id="@+id/menu_favoritos"
             android:title="Favoritos" />
         <item

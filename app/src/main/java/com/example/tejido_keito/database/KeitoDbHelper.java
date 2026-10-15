@@ -14,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import com.example.tejido_keito.database.KeitoContract.TutorialEntry;
+import com.example.tejido_keito.models.Tutorial;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,16 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Keito.db";
 
     private final Context appContext;
+
+    private static final String SQL_CREATE_TUTORIALES =
+            "CREATE TABLE " + TutorialEntry.TABLE_NAME + " (" +
+                    TutorialEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    TutorialEntry.COLUMN_TITULO + " TEXT NOT NULL, " +
+                    TutorialEntry.COLUMN_DESCRIPCION + " TEXT, " +
+                    TutorialEntry.COLUMN_VIDEO + " TEXT NOT NULL)";
+
+    private static final String SQL_DELETE_TUTORIALES =
+            "DROP TABLE IF EXISTS " + TutorialEntry.TABLE_NAME;
 
     private static final String SQL_CREATE_USUARIOS =
             "CREATE TABLE " + UsuarioEntry.TABLE_NAME + " (" +
@@ -73,6 +85,8 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_PATRONES);
         db.execSQL(SQL_CREATE_PROGRESO);
         precargarPatrones(db);
+        db.execSQL(SQL_CREATE_TUTORIALES);
+        precargarTutoriales(db);
     }
 
     @Override
@@ -80,6 +94,7 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_DELETE_PROGRESO);
         db.execSQL(SQL_DELETE_PATRONES);
         db.execSQL(SQL_DELETE_USUARIOS);
+        db.execSQL(SQL_DELETE_TUTORIALES);
         onCreate(db);
     }
 
@@ -351,5 +366,62 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         } finally {
             db.close();
         }
+    }
+
+    // ---------- Tutoriales ----------
+
+    private void precargarTutoriales(SQLiteDatabase db) {
+        insertarTutorial(db, "Anillo mágico",
+                "Para empezar piezas redondas sin agujero.", "anillo_magico");
+        insertarTutorial(db, "Punto deslizado",
+                "Sirve para unir y cerrar vueltas.", "punto_deslizado");
+        insertarTutorial(db, "Punto bajo",
+                "El punto más usado en amigurumi.", "punto_bajo");
+        insertarTutorial(db, "Punto medio alto",
+                "Un punto un poco más alto que el punto bajo.", "punto_medio_alto");
+        insertarTutorial(db, "Punto alto",
+                "Para piezas más altas y flexibles.", "punto_alto");
+        insertarTutorial(db, "Aumento",
+                "Cómo aumentar puntos en una vuelta.", "aumento");
+        insertarTutorial(db, "Disminución",
+                "Cómo disminuir puntos para cerrar la pieza.", "disminucion");
+    }
+
+    private void insertarTutorial(SQLiteDatabase db, String titulo, String descripcion, String video) {
+        ContentValues values = new ContentValues();
+        values.put(TutorialEntry.COLUMN_TITULO, titulo);
+        values.put(TutorialEntry.COLUMN_DESCRIPCION, descripcion);
+        values.put(TutorialEntry.COLUMN_VIDEO, video);
+        db.insert(TutorialEntry.TABLE_NAME, null, values);
+    }
+
+    public List<Tutorial> obtenerTutoriales() {
+        SQLiteDatabase db = getReadableDatabase();
+        String[] projection = {
+                TutorialEntry._ID,
+                TutorialEntry.COLUMN_TITULO,
+                TutorialEntry.COLUMN_DESCRIPCION,
+                TutorialEntry.COLUMN_VIDEO
+        };
+
+        List<Tutorial> lista = new ArrayList<>();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TutorialEntry.TABLE_NAME, projection, null, null,
+                    null, null, TutorialEntry._ID + " ASC");
+            while (cursor.moveToNext()) {
+                lista.add(new Tutorial(
+                        cursor.getInt(cursor.getColumnIndexOrThrow(TutorialEntry._ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(TutorialEntry.COLUMN_TITULO)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(TutorialEntry.COLUMN_DESCRIPCION)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(TutorialEntry.COLUMN_VIDEO))));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+        return lista;
     }
 }
