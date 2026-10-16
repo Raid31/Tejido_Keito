@@ -14,112 +14,163 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="25dp">
+        android:padding="24dp">
 
         <TextView
-            android:id="@+id/textView3"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:text="Crear cuenta"
-            android:textColor="@color/keito_morado_oscuro"
-            android:textSize="28sp"
+            android:letterSpacing="0.08"
+            android:text="Keito"
+            android:textColor="@color/keito_morado"
+            android:textSize="44sp"
             android:textStyle="bold" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nombre"
-            android:textColorHint="@color/keito_morado"
-            app:boxBackgroundMode="outline"
-            app:boxStrokeColor="@color/keito_morado"
-            app:hintTextColor="@color/keito_morado">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etNombre"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPersonName"
-                android:textColor="@color/keito_texto" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Correo electrónico"
-            android:textColorHint="@color/keito_morado"
-            app:boxBackgroundMode="outline"
-            app:boxStrokeColor="@color/keito_morado"
-            app:hintTextColor="@color/keito_morado">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etCorreoRegistro"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
-                android:textColor="@color/keito_texto" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Contraseña"
-            android:textColorHint="@color/keito_morado"
-            app:boxBackgroundMode="outline"
-            app:boxStrokeColor="@color/keito_morado"
-            app:endIconMode="password_toggle"
-            app:endIconTint="@color/keito_morado"
-            app:hintTextColor="@color/keito_morado">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etContrasenaRegistro"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:textColor="@color/keito_texto" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Confirmar contraseña"
-            android:textColorHint="@color/keito_morado"
-            app:boxBackgroundMode="outline"
-            app:boxStrokeColor="@color/keito_morado"
-            app:endIconMode="password_toggle"
-            app:endIconTint="@color/keito_morado"
-            app:hintTextColor="@color/keito_morado">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etConfirmarContrasena"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:textColor="@color/keito_texto" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <Button
-            android:id="@+id/btnCrearCuenta"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="20dp"
-            android:backgroundTint="@color/keito_morado"
-            android:text="Crear cuenta"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            app:cornerRadius="16dp" />
-
         <TextView
-            android:id="@+id/tvIrLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="28dp"
+            android:text="Teje, cuenta y aprende"
+            android:textColor="@color/keito_morado_oscuro"
+            android:textSize="15sp" />
+
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="¿Ya tienes cuenta? Inicia sesión"
-            android:textAlignment="center"
-            android:textColor="@color/keito_morado" />
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:text="Crear cuenta"
+                    android:textColor="@color/keito_morado_oscuro"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Nombre"
+                    android:textColorHint="@color/keito_morado"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp"
+                    app:boxStrokeColor="@color/keito_morado"
+                    app:hintTextColor="@color/keito_morado">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etNombre"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName"
+                        android:textColor="@color/keito_texto" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:hint="Correo electrónico"
+                    android:textColorHint="@color/keito_morado"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp"
+                    app:boxStrokeColor="@color/keito_morado"
+                    app:hintTextColor="@color/keito_morado">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCorreoRegistro"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textEmailAddress"
+                        android:textColor="@color/keito_texto" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:hint="Contraseña"
+                    android:textColorHint="@color/keito_morado"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp"
+                    app:boxStrokeColor="@color/keito_morado"
+                    app:endIconMode="password_toggle"
+                    app:endIconTint="@color/keito_morado"
+                    app:hintTextColor="@color/keito_morado">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etContrasenaRegistro"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:textColor="@color/keito_texto" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:hint="Confirmar contraseña"
+                    android:textColorHint="@color/keito_morado"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp"
+                    app:boxStrokeColor="@color/keito_morado"
+                    app:endIconMode="password_toggle"
+                    app:endIconTint="@color/keito_morado"
+                    app:hintTextColor="@color/keito_morado">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etConfirmarContrasena"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:textColor="@color/keito_texto" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Button
+                    android:id="@+id/btnCrearCuenta"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="24dp"
+                    android:backgroundTint="@color/keito_morado"
+                    android:text="Crear cuenta"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    app:cornerRadius="16dp" />
+
+                <TextView
+                    android:id="@+id/tvIrLogin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:padding="8dp"
+                    android:text="¿Ya tienes cuenta? Inicia sesión"
+                    android:textAlignment="center"
+                    android:textColor="@color/keito_morado"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
     </LinearLayout>
 </ScrollView>
