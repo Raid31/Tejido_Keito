@@ -41,4 +41,12 @@ public final class KeitoContract {
         public static final String COLUMN_VUELTA_ACTUAL = "vuelta_actual";
         public static final String COLUMN_ULTIMA_ACTUALIZACION = "ultima_actualizacion";
     }
+
+    // Tabla de tiendas
+    public static class TiendaEntry implements BaseColumns{
+        public static final String TABLE_NAME = "tiendas";
+        public static final String COLUMN_NOMBRE = "nombre";
+        public static final String COLUMN_LATITUD = "latitud";
+        public static final String COLUMN_LONGITUD = "longitud";
+    }
 }

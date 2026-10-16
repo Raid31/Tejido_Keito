@@ -6,8 +6,10 @@
             android:title="Mi progreso" />
         <item
             android:id="@+id/menu_tutoriales"
-            android:icon="@android:drawable/ic_media_play"
             android:title="Tutoriales" />
+        <item
+            android:id="@+id/menu_tiendas"
+            android:title="Tiendas cercanas" />
         <item
             android:id="@+id/menu_favoritos"
             android:title="Favoritos" />

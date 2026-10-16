@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import com.example.tejido_keito.database.KeitoContract.TutorialEntry;
 import com.example.tejido_keito.models.Tutorial;
+import com.example.tejido_keito.database.KeitoContract.TiendaEntry;
+import com.example.tejido_keito.models.Tienda;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +81,16 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         this.appContext = context.getApplicationContext();
     }
 
+    private static final String SQL_CREATE_TIENDAS =
+            "CREATE TABLE " + TiendaEntry.TABLE_NAME + " (" +
+                    TiendaEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    TiendaEntry.COLUMN_NOMBRE + " TEXT NOT NULL, " +
+                    TiendaEntry.COLUMN_LATITUD + " REAL NOT NULL, " +
+                    TiendaEntry.COLUMN_LONGITUD + " REAL NOT NULL)";
+
+    private static final String SQL_DELETE_TIENDAS =
+            "DROP TABLE IF EXISTS " + TiendaEntry.TABLE_NAME;
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_USUARIOS);
@@ -87,6 +99,8 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         precargarPatrones(db);
         db.execSQL(SQL_CREATE_TUTORIALES);
         precargarTutoriales(db);
+        db.execSQL(SQL_CREATE_TIENDAS);
+        precargarTiendas(db);
     }
 
     @Override
@@ -95,6 +109,7 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_DELETE_PATRONES);
         db.execSQL(SQL_DELETE_USUARIOS);
         db.execSQL(SQL_DELETE_TUTORIALES);
+        db.execSQL(SQL_DELETE_TIENDAS);
         onCreate(db);
     }
 
@@ -423,5 +438,81 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
             db.close();
         }
         return lista;
+    }
+
+    // ---------- Tiendas ----------
+
+    private void precargarTiendas(SQLiteDatabase db) {
+        insertarTienda(db, "Tienda 1", -20.215008808748415, -70.14918328503103);
+        insertarTienda(db, "Paquetería Violeta", -20.216533870874848, -70.1485808559228);
+        insertarTienda(db, "Casa Lala", -20.216664753105317, -70.14864522893663);
+        insertarTienda(db, "Tienda 2", -20.216745295961662, -70.14848429640205);
+        insertarTienda(db, "Casa Bianca", -20.2181950602457, -70.14804441414086);
+        insertarTienda(db, "Feria Persa", -20.217500383212034, -70.14811951599032);
+        insertarTienda(db, "Müna Paquetería", -20.219916637785715, -70.14880616147121);
+    }
+
+    private void insertarTienda(SQLiteDatabase db, String nombre, double latitud, double longitud) {
+        ContentValues values = new ContentValues();
+        values.put(TiendaEntry.COLUMN_NOMBRE, nombre);
+        values.put(TiendaEntry.COLUMN_LATITUD, latitud);
+        values.put(TiendaEntry.COLUMN_LONGITUD, longitud);
+        db.insert(TiendaEntry.TABLE_NAME, null, values);
+    }
+
+    // Guarda una tienda nueva (devuelve el id, o -1 si falló)
+    public long insertarTienda(String nombre, double latitud, double longitud) {
+        SQLiteDatabase db = getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(TiendaEntry.COLUMN_NOMBRE, nombre);
+            values.put(TiendaEntry.COLUMN_LATITUD, latitud);
+            values.put(TiendaEntry.COLUMN_LONGITUD, longitud);
+            return db.insert(TiendaEntry.TABLE_NAME, null, values);
+        } finally {
+            db.close();
+        }
+    }
+
+    public List<Tienda> obtenerTiendas() {
+        SQLiteDatabase db = getReadableDatabase();
+        String[] projection = {
+                TiendaEntry._ID,
+                TiendaEntry.COLUMN_NOMBRE,
+                TiendaEntry.COLUMN_LATITUD,
+                TiendaEntry.COLUMN_LONGITUD
+        };
+
+        List<Tienda> lista = new ArrayList<>();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TiendaEntry.TABLE_NAME, projection, null, null,
+                    null, null, TiendaEntry.COLUMN_NOMBRE + " ASC");
+            while (cursor.moveToNext()) {
+                lista.add(new Tienda(
+                        cursor.getInt(cursor.getColumnIndexOrThrow(TiendaEntry._ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(TiendaEntry.COLUMN_NOMBRE)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(TiendaEntry.COLUMN_LATITUD)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(TiendaEntry.COLUMN_LONGITUD))));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+        return lista;
+    }
+
+    // Elimina una tienda (devuelve cuántas filas borró)
+    public int eliminarTienda(int id) {
+        SQLiteDatabase db = getWritableDatabase();
+        try {
+            return db.delete(TiendaEntry.TABLE_NAME,
+                    TiendaEntry._ID + " = ?",
+                    new String[]{String.valueOf(id)});
+        } finally {
+            db.close();
+        }
     }
 }
