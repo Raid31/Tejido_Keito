@@ -27,6 +27,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -56,10 +57,24 @@ public class BibliotecaActivity extends AppCompatActivity {
         adapter = new PatronAdapter(new ArrayList<>());
         rvPatrones.setAdapter(adapter);
 
-        // Lista de patrones desde SQLite (en segundo plano)
-        cargarPatrones();
+        // Corazón: guardar o quitar el favorito en segundo plano
+        adapter.setOnFavoritoListener((patron, esFavorito) -> ejecutor.execute(() -> {
+            if (esFavorito) {
+                dbHelper.agregarFavorito(sesion.getUsuarioId(), patron.getId());
+            } else {
+                dbHelper.quitarFavorito(sesion.getUsuarioId(), patron.getId());
+            }
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                Toast.makeText(this,
+                        esFavorito ? "Agregado a favoritos" : "Quitado de favoritos",
+                        Toast.LENGTH_SHORT).show();
+            });
+        }));
 
-        //Buscador + filtro por dificultad
+        // Buscador + filtro por dificultad
         etBuscar = findViewById(R.id.etBuscar);
         rgDificultad = findViewById(R.id.rgDificultad);
 
@@ -98,7 +113,7 @@ public class BibliotecaActivity extends AppCompatActivity {
             } else if (id == R.id.menu_tutoriales) {
                 startActivity(new Intent(BibliotecaActivity.this, TutorialesActivity.class));
             } else if (id == R.id.menu_favoritos) {
-                Toast.makeText(this, "Favoritos: próximamente", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(BibliotecaActivity.this, FavoritosActivity.class));
             } else if (id == R.id.menu_tiendas) {
                 startActivity(new Intent(BibliotecaActivity.this, TiendasActivity.class));
             } else if (id == R.id.menu_cerrar_sesion) {
@@ -123,16 +138,25 @@ public class BibliotecaActivity extends AppCompatActivity {
         });
     }
 
-    // Lee los patrones en un hilo secundario y los muestra al terminar
+    // Se recarga cada vez que la pantalla vuelve a verse (por ejemplo, al volver de Favoritos)
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cargarPatrones();
+    }
+
+    // Lee los patrones y los favoritos en un hilo secundario y los muestra al terminar
     private void cargarPatrones() {
         ejecutor.execute(() -> {
             List<Patron> patrones = dbHelper.obtenerPatrones();
+            Set<Integer> favoritos = dbHelper.obtenerFavoritosUsuario(sesion.getUsuarioId());
 
             runOnUiThread(() -> {
                 if (isFinishing() || isDestroyed()) {
                     return;
                 }
                 listaPatrones = patrones;
+                adapter.setFavoritos(favoritos);
                 filtrar();   // aplica lo que haya escrito/seleccionado (por defecto, todos)
             });
         });
@@ -179,9 +203,12 @@ public class BibliotecaActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Cierra la base en el mismo hilo, después de las consultas pendientes
+        ejecutor.execute(() -> {
+            if (dbHelper != null) {
+                dbHelper.close();
+            }
+        });
         ejecutor.shutdown();
-        if (dbHelper != null) {
-            dbHelper.close();
-        }
     }
 }

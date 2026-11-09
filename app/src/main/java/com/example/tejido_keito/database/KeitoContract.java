@@ -49,4 +49,11 @@ public final class KeitoContract {
         public static final String COLUMN_LATITUD = "latitud";
         public static final String COLUMN_LONGITUD = "longitud";
     }
+
+    // Tabla de favoritos
+    public  static  class  FavoritoEntry implements  BaseColumns{
+        public static  final  String TABLE_NAME = "favoritos";
+        public static  final  String COLUMN_USUARIO_ID = "usuario_id";
+        public static  final  String COLUMN_PATRON_ID = "patron_id";
+    }
 }

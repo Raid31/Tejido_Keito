@@ -56,4 +56,16 @@
 
         </LinearLayout>
     </LinearLayout>
+
+
+    <ImageButton
+        android:id="@+id/btnFavorito"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="6dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Marcar como favorito"
+        android:src="@drawable/ic_favorito_vacio"
+        app:tint="@color/keito_morado" />
 </androidx.cardview.widget.CardView>

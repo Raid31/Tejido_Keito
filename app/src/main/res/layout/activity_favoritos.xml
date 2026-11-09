@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/keito_lavanda"
+    tools:context=".activities.FavoritosActivity">
+
+  <TextView
+      android:id="@+id/tvTituloFavoritos"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="20dp"
+      android:layout_marginTop="24dp"
+      android:layout_marginEnd="20dp"
+      android:text="Favoritos"
+      android:textColor="@color/keito_morado_oscuro"
+      android:textSize="28sp"
+      android:textStyle="bold"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+      android:id="@+id/tvSubtituloFavoritos"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="20dp"
+      android:layout_marginTop="4dp"
+      android:layout_marginEnd="20dp"
+      android:text="Los patrones que te gustaron"
+      android:textColor="#6B6785"
+      android:textSize="15sp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/tvTituloFavoritos" />
+
+  <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/rvFavoritos"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:layout_marginTop="12dp"
+      android:clipToPadding="false"
+      android:paddingStart="20dp"
+      android:paddingEnd="20dp"
+      android:paddingBottom="12dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/tvSubtituloFavoritos" />
+
+  <TextView
+      android:id="@+id/tvVacioFavoritos"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="32dp"
+      android:layout_marginEnd="32dp"
+      android:gravity="center"
+      android:text="Aún no tienes favoritos.\nToca el corazón de un patrón en la biblioteca para guardarlo aquí."
+      android:textColor="@color/keito_texto"
+      android:textSize="18sp"
+      android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

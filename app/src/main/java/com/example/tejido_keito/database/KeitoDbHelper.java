@@ -18,6 +18,9 @@ import com.example.tejido_keito.database.KeitoContract.TutorialEntry;
 import com.example.tejido_keito.models.Tutorial;
 import com.example.tejido_keito.database.KeitoContract.TiendaEntry;
 import com.example.tejido_keito.models.Tienda;
+import com.example.tejido_keito.database.KeitoContract.FavoritoEntry;
+import java.util.HashSet;
+import java.util.Set;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +28,7 @@ import java.util.Map;
 
 public class KeitoDbHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "Keito.db";
 
     private final Context appContext;
@@ -91,6 +94,18 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
     private static final String SQL_DELETE_TIENDAS =
             "DROP TABLE IF EXISTS " + TiendaEntry.TABLE_NAME;
 
+    private static final String SQL_CREATE_FAVORITOS =
+            "CREATE TABLE " + FavoritoEntry.TABLE_NAME + " (" +
+                    FavoritoEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    FavoritoEntry.COLUMN_USUARIO_ID + " INTEGER NOT NULL, " +
+                    FavoritoEntry.COLUMN_PATRON_ID + " INTEGER NOT NULL, " +
+                    "UNIQUE (" + FavoritoEntry.COLUMN_USUARIO_ID + ", " +
+                    FavoritoEntry.COLUMN_PATRON_ID + "), " +
+                    "FOREIGN KEY (" + FavoritoEntry.COLUMN_USUARIO_ID + ") REFERENCES " +
+                    UsuarioEntry.TABLE_NAME + "(" + UsuarioEntry._ID + "), " +
+                    "FOREIGN KEY (" + FavoritoEntry.COLUMN_PATRON_ID + ") REFERENCES " +
+                    PatronEntry.TABLE_NAME + "(" + PatronEntry._ID + "));";
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_USUARIOS);
@@ -101,16 +116,15 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         precargarTutoriales(db);
         db.execSQL(SQL_CREATE_TIENDAS);
         precargarTiendas(db);
+        db.execSQL(SQL_CREATE_FAVORITOS);
     }
+
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DELETE_PROGRESO);
-        db.execSQL(SQL_DELETE_PATRONES);
-        db.execSQL(SQL_DELETE_USUARIOS);
-        db.execSQL(SQL_DELETE_TUTORIALES);
-        db.execSQL(SQL_DELETE_TIENDAS);
-        onCreate(db);
+        if (oldVersion < 2) {
+            db.execSQL(SQL_CREATE_FAVORITOS);
+        }
     }
 
     // ---------- Precarga de patrones ----------
@@ -514,5 +528,58 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         } finally {
             db.close();
         }
+    }
+
+    // ---------- Favoritos ----------
+
+    // Marca un patron como favorito
+    public long agregarFavorito(long usuarioId, int patronId) {
+        SQLiteDatabase db = getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(FavoritoEntry.COLUMN_USUARIO_ID, usuarioId);
+            values.put(FavoritoEntry.COLUMN_PATRON_ID, patronId);
+            return db.insertWithOnConflict(FavoritoEntry.TABLE_NAME, null, values,
+                    SQLiteDatabase.CONFLICT_IGNORE);
+        } finally {
+            db.close();
+        }
+    }
+
+    public int quitarFavorito(long usuarioId, int patronId) {
+        SQLiteDatabase db = getWritableDatabase();
+        try {
+            String where = FavoritoEntry.COLUMN_USUARIO_ID + " = ? AND " +
+                    FavoritoEntry.COLUMN_PATRON_ID + " = ?";
+            String[] args = { String.valueOf(usuarioId), String.valueOf(patronId) };
+            return db.delete(FavoritoEntry.TABLE_NAME, where, args);
+        } finally {
+            db.close();
+        }
+    }
+
+    // Devuelve los ids de los patrones favoritos de un usuario
+    public Set<Integer> obtenerFavoritosUsuario(long usuarioId) {
+        SQLiteDatabase db = getReadableDatabase();
+        String[] projection = { FavoritoEntry.COLUMN_PATRON_ID };
+        String selection = FavoritoEntry.COLUMN_USUARIO_ID + " = ?";
+        String[] selectionArgs = { String.valueOf(usuarioId) };
+
+        Set<Integer> favoritos = new HashSet<>();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(FavoritoEntry.TABLE_NAME, projection, selection,
+                    selectionArgs, null, null, null);
+            while (cursor.moveToNext()) {
+                favoritos.add(cursor.getInt(
+                        cursor.getColumnIndexOrThrow(FavoritoEntry.COLUMN_PATRON_ID)));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+        return favoritos;
     }
 }
