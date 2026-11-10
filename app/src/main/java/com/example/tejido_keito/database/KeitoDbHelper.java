@@ -26,9 +26,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Se encarga de la base de datos local
+ * crea las tablas, carga datos iniciales (patron, tutorial, tiendas) y tiene el crud que
+ * usan las pantallas. Los nombres de tablas y columnas vienen de {@link  KeitoContract}.
+ * <p>
+ *     Las pantallas llaman a estos metodos desde un hilo secundario (ExecutorService)
+ *     para que la app no se congele.
+ * </p>
+ */
+
 public class KeitoDbHelper extends SQLiteOpenHelper {
 
+    /** Version de la base de datos */
     public static final int DATABASE_VERSION = 2;
+    /** nombre del archivo de la base de datos */
     public static final String DATABASE_NAME = "Keito.db";
 
     private final Context appContext;
@@ -79,6 +91,10 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
     private static final String SQL_DELETE_PROGRESO =
             "DROP TABLE IF EXISTS " + ProgresoEntry.TABLE_NAME;
 
+    /**
+     * Crea el helper de la base de datos
+     * @param context contexto de la activity que lo usa.
+     */
     public KeitoDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.appContext = context.getApplicationContext();
@@ -106,6 +122,10 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
                     "FOREIGN KEY (" + FavoritoEntry.COLUMN_PATRON_ID + ") REFERENCES " +
                     PatronEntry.TABLE_NAME + "(" + PatronEntry._ID + "));";
 
+    /**
+     * Se ejecuta la primera vez que se abre la base de datos. Crea todas las tablas y carga los patrones, tutoriales y tiendas.
+     * @param db base de datos recien creada.
+     */
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_USUARIOS);
@@ -119,7 +139,14 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_FAVORITOS);
     }
 
-
+    /**
+     *  se ejecuta cuando sube la version de la base. Va por pasos para no borrar
+     *  los datos del usuario. de la version 1 a la 2 solo se agrega la tabla favoritos
+     *
+     * @param db base de datos que se está actualizando.
+     * @param oldVersion versión con la que estaba instalada la app.
+     * @param newVersion versión nueva.
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 2) {
@@ -129,6 +156,11 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
 
     // ---------- Precarga de patrones ----------
 
+    /**
+     * inserta los 9 patrones que vienen con la app.
+     *
+     * @param db base de datos en modo escritura
+     */
     private void precargarPatrones(SQLiteDatabase db) {
 
         insertarPatron(db, "Conejo", "Principiante", 32, "conejo",
@@ -210,6 +242,16 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
                         "DETALLES (según la foto)\nOjos grandes blancos con un punto negro en el centro y bigotes bordados en la cabeza del gato. Un lazo con argolla en la parte de arriba para colgarlo, y el pez colgado con una cadenita.");
     }
 
+    /**
+     * inserta un patron usando ContentValues
+     * @param db               base de datos en modo escritura
+     * @param nombre           nombre del patron
+     * @param dificultad       Principiante, Intermedio o Avanzado
+     * @param totalVueltas     cantidad de vueltas del patrón
+     * @param imagen           nombre de la imagen en drawable (sin extensión)
+     * @param abreviaciones    texto con el significado de las abreviaciones
+     * @param instrucciones    paso a paso del patrón
+     */
     private void insertarPatron(SQLiteDatabase db, String nombre, String dificultad,
                                 int totalVueltas, String imagen,
                                 String abreviaciones, String instrucciones) {
@@ -225,7 +267,14 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
 
     // ---------- Usuarios (registro y login) ----------
 
-    // Retorna el ID del usuario nuevo, o -1 si falla (por ejemplo, correo ya registrado)
+    /**
+     * registra un usuario nuevo
+     * @param nombre        nombre del usuario
+     * @param email         correo (no se puede repetir, es UNIQUE)
+     * @param password      contraseña
+     * @return              id del usuario nuevo, o -1 si falla (por ejemplo si el correo ya existe)
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public long insertarUsuario(String nombre, String email, String password) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -237,7 +286,14 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         return id;
     }
 
-    // Retorna el ID del usuario si el correo y la contraseña coinciden, o -1 si no
+    /**
+     * revisa si el correo y la contraseña coinciden con un usuario guardado
+     *
+     * @param email         correo ingresado
+     * @param password      contraseña ingresada
+     * @return              id del usuario si coinciden, o -1 si no
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public long validarLogin(String email, String password) {
         SQLiteDatabase db = getReadableDatabase();
         String[] projection = { UsuarioEntry._ID };
@@ -264,6 +320,12 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
 
     // ---------- Patrones ----------
 
+    /**
+     *  trae todos los patrones de la base de datos ordenados por id
+     *
+     * @return lista de patrones (vacía si no hay ninguno)
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public List<Patron> obtenerPatrones() {
         List<Patron> lista = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
@@ -297,7 +359,13 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
 
     // ---------- Progreso ----------
 
-    // Guarda la vuelta actual de un usuario en un patrón (crea el registro o lo actualiza)
+    /**
+     * Guarda en qué vuelta va un usuario en un patrón. Primero intenta actualizar el registro y si no existía, lo crea.
+     * @param usuarioId     id del usuario
+     * @param patronId      id del patron
+     * @param vueltaActual  vuelta en la que va
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public void guardarProgreso(long usuarioId, int patronId, int vueltaActual) {
         SQLiteDatabase db = getWritableDatabase();
         try {
@@ -309,7 +377,6 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
                     ProgresoEntry.COLUMN_PATRON_ID + " = ?";
             String[] args = { String.valueOf(usuarioId), String.valueOf(patronId) };
 
-            // Primero intenta actualizar; si no existía el registro, lo inserta
             int filas = db.update(ProgresoEntry.TABLE_NAME, values, where, args);
             if (filas == 0) {
                 values.put(ProgresoEntry.COLUMN_USUARIO_ID, usuarioId);
@@ -321,7 +388,14 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         }
     }
 
-    // Devuelve la vuelta guardada de un usuario en un patrón (0 si nunca empezó)
+    /**
+     * Busca la vuelta guardada de un usuario en un patrón.
+     *
+     * @param usuarioId     id del usuario
+     * @param patronId      id del patrón
+     * @return              la vuelta guardada, o 0 si nunca lo empezó
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public int obtenerProgreso(long usuarioId, int patronId) {
         SQLiteDatabase db = getReadableDatabase();
         String[] projection = { ProgresoEntry.COLUMN_VUELTA_ACTUAL };
@@ -347,12 +421,24 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         return vuelta;
     }
 
+
+    /**
+     * fecha y hora actual para guardar la ultima actualizacion del progreso
+     *
+     * @return      texto con formato yyyy-MM-dd HH:mm:ss
+     */
     private String fechaActual() {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                 .format(new Date());
     }
 
-    // Devuelve un mapa patronId -> vuelta actual, solo de los patrones que el usuario ya empezo
+    /**
+     * Trae el progreso de todos los patrones que el usuario ya empezo (los que tienen la vuelta mayor a 0).
+     *
+     * @param usuarioId     id del usuario
+     * @return              mapa con id del patrón como llave y la vuelta actual como valor
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public Map<Integer, Integer> obtenerProgresoUsuario(long usuarioId) {
         SQLiteDatabase db = getReadableDatabase();
         String[] projection = {
@@ -384,7 +470,14 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         return progresos;
     }
 
-    // Elimina el progreso de un usuario en un patran (devuelve cuántas filas borro)
+    /**
+     * borra el progreso de un usuario en un patron
+     *
+     * @param usuarioId     id del usuario
+     * @param patronId      id del patron
+     * @return              cantidad de filas borradas
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public int eliminarProgreso(long usuarioId, int patronId) {
         SQLiteDatabase db = getWritableDatabase();
         try {
@@ -399,6 +492,11 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
 
     // ---------- Tutoriales ----------
 
+    /**
+     * inserta los video tutoriales que vienen con la app
+     *
+     * @param db base de datos en modo escritura (la que llega en onCreate)
+     */
     private void precargarTutoriales(SQLiteDatabase db) {
         insertarTutorial(db, "Anillo mágico",
                 "Para empezar piezas redondas sin agujero.", "anillo_magico");
@@ -416,6 +514,14 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
                 "Cómo disminuir puntos para cerrar la pieza.", "disminucion");
     }
 
+    /**
+     *  inserta el tutorial usando contentValues
+     *
+     * @param db            base de datos en modo escritura
+     * @param titulo        nombre del punto
+     * @param descripcion   explicacion corta
+     * @param video         nombre del archivo en res/raw
+     */
     private void insertarTutorial(SQLiteDatabase db, String titulo, String descripcion, String video) {
         ContentValues values = new ContentValues();
         values.put(TutorialEntry.COLUMN_TITULO, titulo);
@@ -424,6 +530,12 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         db.insert(TutorialEntry.TABLE_NAME, null, values);
     }
 
+    /**
+     * trae todos los tutoriales ordenados por id
+     *
+     * @return lista de los tutoriales
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public List<Tutorial> obtenerTutoriales() {
         SQLiteDatabase db = getReadableDatabase();
         String[] projection = {
@@ -456,6 +568,11 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
 
     // ---------- Tiendas ----------
 
+    /**
+     * inserta las tiendas de Iquique con sus coordenadas
+     *
+     * @param db        base de datos en modo escritura
+     */
     private void precargarTiendas(SQLiteDatabase db) {
         insertarTienda(db, "Tienda 1", -20.215008808748415, -70.14918328503103);
         insertarTienda(db, "Paquetería Violeta", -20.216533870874848, -70.1485808559228);
@@ -466,6 +583,14 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         insertarTienda(db, "Müna Paquetería", -20.219916637785715, -70.14880616147121);
     }
 
+    /**
+     * inserta una tienda usando la base de datos que llega por parametro
+     *
+     * @param db        base de datos en modo escritura
+     * @param nombre    nombre de la tienda
+     * @param latitud   latitud gps
+     * @param longitud  longitud gps
+     */
     private void insertarTienda(SQLiteDatabase db, String nombre, double latitud, double longitud) {
         ContentValues values = new ContentValues();
         values.put(TiendaEntry.COLUMN_NOMBRE, nombre);
@@ -474,7 +599,15 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         db.insert(TiendaEntry.TABLE_NAME, null, values);
     }
 
-    // Guarda una tienda nueva (devuelve el id, o -1 si falló)
+    /**
+     *  guarda una tienda nueva
+     *
+     * @param nombre    nombre de la tienda
+     * @param latitud   latitud gps
+     * @param longitud  longitud gps
+     * @return          id de la tienda, o -1 si fallo
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public long insertarTienda(String nombre, double latitud, double longitud) {
         SQLiteDatabase db = getWritableDatabase();
         try {
@@ -488,6 +621,12 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * trae a todas las tiendas ordenadas por nombre
+     *
+     * @return      lista de tiendas
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public List<Tienda> obtenerTiendas() {
         SQLiteDatabase db = getReadableDatabase();
         String[] projection = {
@@ -518,7 +657,13 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         return lista;
     }
 
-    // Elimina una tienda (devuelve cuántas filas borró)
+    /**
+     * elimina una tiemda
+     *
+     * @param id        id de la tienda
+     * @return          cantidad de filas borradas
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public int eliminarTienda(int id) {
         SQLiteDatabase db = getWritableDatabase();
         try {
@@ -532,7 +677,15 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
 
     // ---------- Favoritos ----------
 
-    // Marca un patron como favorito
+    /**
+     *  marca un patrom como favorito. si ya estaba como favorito no hace nada
+     *  (la tabla tiene UNIQUE)
+     *
+     * @param usuarioId     id del usuario
+     * @param patronId      id del patron
+     * @return              id del favorito nuevo, o -1 si fallo o ya existia
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public long agregarFavorito(long usuarioId, int patronId) {
         SQLiteDatabase db = getWritableDatabase();
         try {
@@ -546,6 +699,14 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * saca un patron de los favoritos de cada usuario
+     *
+     * @param usuarioId     id del usuario
+     * @param patronId      id del patron
+     * @return              cantidad de filas borradas
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public int quitarFavorito(long usuarioId, int patronId) {
         SQLiteDatabase db = getWritableDatabase();
         try {
@@ -558,7 +719,13 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         }
     }
 
-    // Devuelve los ids de los patrones favoritos de un usuario
+    /**
+     * trae los id de los patrones favoritos de cada usuario
+     *
+     * @param usuarioId id del usuario
+     * @return          conjunto con los id de los patones favoritos
+     * @throws android.database.sqlite.SQLiteException si no se puede abrir la base de datos
+     */
     public Set<Integer> obtenerFavoritosUsuario(long usuarioId) {
         SQLiteDatabase db = getReadableDatabase();
         String[] projection = { FavoritoEntry.COLUMN_PATRON_ID };
