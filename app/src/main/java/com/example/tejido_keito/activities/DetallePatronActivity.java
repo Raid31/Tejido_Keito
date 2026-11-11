@@ -12,8 +12,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.tejido_keito.R;
 import com.example.tejido_keito.utils.FormatoTexto;
 
+/**
+ * Muestra el detalle de un patron (imagen, dificultad, vueltas, abreviaciones e instrucciones)
+ * Los datos llegan por intent desde la biblioteca o desde favoritos
+ */
 public class DetallePatronActivity extends AppCompatActivity {
 
+    /**
+     * lee los extras (id, nombre, dificultad, totalVueltas, imagenResId, abreviaciones e instrucciones),
+     * los musetra y deja listo el boton que abre el contador con los mismos datos.
+     *
+     * @param savedInstanceState estado anterior de la pantalla, si lo hay (por ejemplo al girar el teléfono)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +75,13 @@ public class DetallePatronActivity extends AppCompatActivity {
         });
     }
 
-    // Al tocar el encabezado: muestra u oculta el contenido y cambia la flecha
+    /**
+     * Hace que una seccion se muestre u oculte al tocar su encabezado y cambia la flecha
+     *
+     * @param encabezado    vista que se toca
+     * @param contenido     texto que se muestra u oculta
+     * @param flecha        texto con la flecha
+     */
     private void configurarDesplegable(View encabezado, TextView contenido, TextView flecha) {
         encabezado.setOnClickListener(v -> {
             boolean estabaVisible = contenido.getVisibility() == View.VISIBLE;

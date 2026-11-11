@@ -31,6 +31,13 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Pantalla principal con la lista de patrones. Tiene buscador, filtro por dificultad,
+ * corazón para marcar favoritos y el menu lateral para ir a las otras secciones.
+ * <p>
+ *     las consultas a la base de datos se hjacen en un hilo secundario (executorService)
+ * </p>
+ */
 public class BibliotecaActivity extends AppCompatActivity {
 
     private KeitoDbHelper dbHelper;
@@ -44,6 +51,11 @@ public class BibliotecaActivity extends AppCompatActivity {
     // Hilo secundario para las consultas a la base de datos
     private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
+    /**
+     * arma la lista, el buscador, el filtro, favoritos y menu lateral
+     *
+     * @param savedInstanceState  estado anterior de la pantalla, si lo hay (por ejemplo al girar el teléfono)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,7 +136,7 @@ public class BibliotecaActivity extends AppCompatActivity {
             return true;
         });
 
-        // ---------- Botón Atrás: si el menú está abierto, lo cierra primero ----------
+        // Botón Atras: si el menú está abierto, lo cierra primero
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -138,14 +150,18 @@ public class BibliotecaActivity extends AppCompatActivity {
         });
     }
 
-    // Se recarga cada vez que la pantalla vuelve a verse (por ejemplo, al volver de Favoritos)
+    /**
+     *  recarga los patrones y los favoritos cada vez que la pantalla vuelve a verse, por ejemplo al volver de favoritos
+     */
     @Override
     protected void onResume() {
         super.onResume();
         cargarPatrones();
     }
 
-    // Lee los patrones y los favoritos en un hilo secundario y los muestra al terminar
+    /**
+     * lee los patrones y favoritos del usuario en un hilo secundario y los muestra al terminar
+     */
     private void cargarPatrones() {
         ejecutor.execute(() -> {
             List<Patron> patrones = dbHelper.obtenerPatrones();
@@ -157,12 +173,14 @@ public class BibliotecaActivity extends AppCompatActivity {
                 }
                 listaPatrones = patrones;
                 adapter.setFavoritos(favoritos);
-                filtrar();   // aplica lo que haya escrito/seleccionado (por defecto, todos)
+                filtrar();
             });
         });
     }
 
-    // Aplica buscador + dificultad al mismo tiempo
+    /**
+     * aplica el buscador y la dificultad al mismo tiempo y actualiza la lista
+     */
     private void filtrar() {
         String texto = etBuscar.getText().toString().toLowerCase().trim();
 
@@ -189,7 +207,9 @@ public class BibliotecaActivity extends AppCompatActivity {
         adapter.actualizarLista(listaFiltrada);
     }
 
-    // Borra la sesión guardada y vuelve a la pantalla de bienvenida
+    /**
+     * borra la sesion guardada y vuelve a la pantalla de bienbenida, limpiando las pantallas anteriores
+     */
     private void cerrarSesion() {
         sesion.cerrarSesion();
         Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
@@ -200,10 +220,13 @@ public class BibliotecaActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * cierra la base de datos en el mismo hilo secundario despues de las consultas pendientes y
+     * apaga el executor
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Cierra la base en el mismo hilo, después de las consultas pendientes
         ejecutor.execute(() -> {
             if (dbHelper != null) {
                 dbHelper.close();

@@ -16,6 +16,10 @@ import com.example.tejido_keito.database.KeitoDbHelper;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Pantalla de registro de usuario. Vlida los datos dy guarda el usuario en SQLite (hilo secundario)
+ * Cuando se crea la cuenta vuelve al login
+ */
 public class RegistroActivity extends AppCompatActivity {
 
     private EditText etNombre;
@@ -27,6 +31,12 @@ public class RegistroActivity extends AppCompatActivity {
     // Hilo secundario para las consultas a la base de datos
     private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
+    /**
+     * Arma el formulario de registro, revisa que no hayan capos vacios, que el correo sea valido, que la contraseña
+     * tenga al menos 6 caracteres y que las dos coincidan y despues guarda el usuario
+     *
+     * @param savedInstanceState estado anterior de la pantalla, si lo hay (por ejemplo al girar el teléfono)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,10 +81,10 @@ public class RegistroActivity extends AppCompatActivity {
             btnCrearCuenta.setEnabled(false);
 
             ejecutor.execute(() -> {
-                // --- Hilo secundario: guardar en SQLite (devuelve -1 si el correo ya existe) ---
+                //Hilo secundario: guardar en SQLite (devuelve -1 si el correo ya existe)
                 long resultado = dbHelper.insertarUsuario(nombre, correo, contrasena);
 
-                // --- Hilo principal: reaccionar al resultado ---
+                //Hilo principal: reaccionar al resultado
                 runOnUiThread(() -> {
                     if (isFinishing() || isDestroyed()) {
                         return;
@@ -96,7 +106,12 @@ public class RegistroActivity extends AppCompatActivity {
         tvIrLogin.setOnClickListener(v -> irALogin(null));
     }
 
-    // Vuelve al Login sin apilar pantallas repetidas
+    /**
+     * vuelve al login sin pantallas repetidas
+     *
+     * @param correo    correo reciem registrado (se manda como extra "correo" para dejarlo escrito en el login),
+     *                  o null si no hay
+     */
     private void irALogin(String correo) {
         Intent intent = new Intent(RegistroActivity.this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -107,6 +122,9 @@ public class RegistroActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Apaga el hilo secundario y cierra la base de datos
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();

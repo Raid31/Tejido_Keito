@@ -12,11 +12,26 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tejido_keito.R;
 
+/**
+ * Reproduce un tutorial en video guardado en res/raw, dentro de la app.
+ * Recibe por Intent: titulo, descripcion y video (nombre del archivo).
+ */
 public class VideoActivity extends AppCompatActivity {
 
     private VideoView videoView;
     private int posicion = 0;   // milisegundos donde quedó el video
 
+
+    /**
+     * Busca el video, prepara los controles y lo reproduce
+     * (retomando donde iba si se giró la pantalla).
+     * Si el video no existe, avisa y cierra la pantalla.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,7 +86,9 @@ public class VideoActivity extends AppCompatActivity {
         });
     }
 
-    // Al minimizar la app, pausar el video y recordar dónde iba
+    /**
+     *  Al minimizar la app, pausa el video y recuerda dónde iba.
+     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -81,6 +98,12 @@ public class VideoActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Guarda la posición del video para retomarlo si se gira la pantalla.
+     *
+     * @param outState Bundle in which to place your saved state.
+     *
+     */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

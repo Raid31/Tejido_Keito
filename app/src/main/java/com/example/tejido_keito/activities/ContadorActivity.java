@@ -35,6 +35,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * El contado de vueltas de un patron. Se maneja con botones o por voz(ej: siguiente/atras) y guarda
+ * el progreso del usuario en SQLite
+ * <p>
+ *     recibe por intent : id, nombre, totalVueltas, abreviaciones e instrucciones
+ * </p>
+ */
 public class ContadorActivity extends AppCompatActivity {
 
     // Palabras que el contador entiende
@@ -43,7 +50,6 @@ public class ContadorActivity extends AppCompatActivity {
     private static final List<String> PALABRAS_RESTAR = Arrays.asList(
             "atrás", "atras", "anterior", "menos", "restar", "resta", "deshacer", "borrar");
 
-    // Volúmenes que se silencian mientras la voz está activa (para que no suenen los pitidos)
     private static final int[] STREAMS_PITIDO = {
             AudioManager.STREAM_MUSIC,
             AudioManager.STREAM_NOTIFICATION
@@ -70,7 +76,9 @@ public class ContadorActivity extends AppCompatActivity {
     private boolean escuchando = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
-    // Pide el permiso del micrófono y, si lo dan, empieza a escuchar
+    /**
+     * Pide el permiso del microfono y si lo dan, comienza a escuchar
+     */
     private final ActivityResultLauncher<String> permisoMicrofono =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), concedido -> {
                 if (concedido) {
@@ -82,6 +90,11 @@ public class ContadorActivity extends AppCompatActivity {
                 }
             });
 
+    /**
+     * Lee los extras del patron, recupera la vuelta y deja listo los botones
+     *
+     * @param savedInstanceState estado anterior de la pantalla, si lo hay (por ejemplo al girar el teléfono)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,7 +134,7 @@ public class ContadorActivity extends AppCompatActivity {
         tvInstruccionesContador.setText(FormatoTexto.instrucciones(this, instrucciones));
         progressVueltas.setMax(totalVueltas);
 
-        // Recuperar la vuelta: si se giró la pantalla, del estado; si no, de la base de datos
+        // Recuperar la vuelta, si se giro la pantalla, del estado; si no, de la base de datos
         if (savedInstanceState != null) {
             vueltaActual = savedInstanceState.getInt("vuelta", 0);
         } else if (puedeGuardar()) {
@@ -162,6 +175,10 @@ public class ContadorActivity extends AppCompatActivity {
 
     // ---------------- Contador ----------------
 
+    /**
+     * Suma una vuelta y guarda el progreso. Si llega al final de vueltas, deja de escuchar y
+     * avisa que se termino el patron.
+     */
     private void sumar() {
         if (vueltaActual < totalVueltas) {
             vueltaActual++;
@@ -177,6 +194,9 @@ public class ContadorActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Resta una vuelta y guarda el progreso
+     */
     private void restar() {
         if (vueltaActual > 0) {
             vueltaActual--;
@@ -186,6 +206,9 @@ public class ContadorActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * muestra en pantalla la vuelta actuaal, el total y la barra de progreso
+     */
     private void actualizarUi() {
         tvVueltaActual.setText(String.valueOf(vueltaActual));
         tvDeTotal.setText("de " + totalVueltas + " vueltas");
@@ -194,16 +217,21 @@ public class ContadorActivity extends AppCompatActivity {
 
     // ---------------- Progreso (SQLite) ----------------
 
+    /**
+     * Revisa que haya un patron y un usuario validos para guardar el progreso
+     * @return  true si el id del patron y del usuario son validos
+     */
     private boolean puedeGuardar() {
         return patronId != -1 && usuarioId != -1;
     }
 
-    // Lee la vuelta guardada en segundo plano y la muestra al terminar
+    /**
+     * Lee la vuelta guardada en un hilo secundario y la muestra al terminar.
+     */
     private void cargarProgresoGuardado() {
         ejecutor.execute(() -> {
             int guardada = Math.min(dbHelper.obtenerProgreso(usuarioId, patronId), totalVueltas);
             runOnUiThread(() -> {
-                // Si ya sumaste una vuelta antes de que llegara el dato, no lo pisamos
                 if (isFinishing() || isDestroyed() || guardada <= 0 || vueltaActual != 0) {
                     return;
                 }
@@ -215,7 +243,10 @@ public class ContadorActivity extends AppCompatActivity {
         });
     }
 
-    // Guarda en segundo plano (el executor es de un solo hilo, así que respeta el orden)
+    /**
+     * Guarda la vuelta actual en un hilo secundario. Como el executor es de un solo hilo,
+     * se respeta el orden de los guardados.
+     */
     private void guardarProgreso() {
         if (puedeGuardar()) {
             final int vuelta = vueltaActual;
@@ -225,7 +256,9 @@ public class ContadorActivity extends AppCompatActivity {
 
     // ---------------- Pitidos ----------------
 
-    // Silencia los volúmenes por donde suena el pitido del reconocedor
+    /**
+     *     Silencia los volúmenes por donde suena el pitido del reconocedor
+     */
     private void silenciarPitidos() {
         AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         if (audio == null) {
@@ -233,7 +266,6 @@ public class ContadorActivity extends AppCompatActivity {
         }
         for (int i = 0; i < STREAMS_PITIDO.length; i++) {
             try {
-                // Solo silenciamos lo que no estaba ya silenciado
                 if (!audio.isStreamMute(STREAMS_PITIDO[i])) {
                     audio.adjustStreamVolume(STREAMS_PITIDO[i], AudioManager.ADJUST_MUTE, 0);
                     silenciadoPorApp[i] = true;
@@ -244,7 +276,9 @@ public class ContadorActivity extends AppCompatActivity {
         }
     }
 
-    // Devuelve el sonido solo en lo que la app silenció
+    /**
+     *     Devuelve el sonido solo en lo que la app silenció
+     */
     private void restaurarSonido() {
         AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         if (audio == null) {
@@ -263,6 +297,9 @@ public class ContadorActivity extends AppCompatActivity {
 
     // ---------------- Voz ----------------
 
+    /**
+     * Si ya tiene el permiso del microfono empieza a escuchar, si no, lo pide.
+     */
     private void pedirPermisoYEscuchar() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -272,6 +309,9 @@ public class ContadorActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Prepara el reconocedor de voz y empieza a escuchar.
+     */
     private void iniciarEscucha() {
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
             Toast.makeText(this,
@@ -292,7 +332,9 @@ public class ContadorActivity extends AppCompatActivity {
         escucharUnaVez();
     }
 
-    // El reconocedor escucha una frase y se detiene; por eso lo reiniciamos cada vez
+    /**
+     *  escucha un frase. el reconocedor se detiene al terminar, por eso se vuelve a llamar cada vez
+     */
     private void escucharUnaVez() {
         if (!escuchando || recognizer == null) {
             return;
@@ -306,6 +348,9 @@ public class ContadorActivity extends AppCompatActivity {
         recognizer.startListening(intent);
     }
 
+    /**
+     * deja de escuchar y devuelve el sonido. cambia los textos a "voz en pausa"
+     */
     private void detenerEscucha() {
         escuchando = false;
         handler.removeCallbacksAndMessages(null);
@@ -318,7 +363,11 @@ public class ContadorActivity extends AppCompatActivity {
         tvEstadoVoz.setText("Voz en pausa");
     }
 
-    // Busca una palabra de comando dentro de lo que se escuchó
+    /**
+     * busca una palabra de comadno dentro de lo que esucho y suna o resta una vuelta.
+     *
+     * @param frases    posibles frases que entendio el reconocedor
+     */
     private void procesarComando(ArrayList<String> frases) {
         if (frases == null || frases.isEmpty()) {
             return;
@@ -345,19 +394,31 @@ public class ContadorActivity extends AppCompatActivity {
         tvEstadoVoz.setText("No entendí: «" + frases.get(0) + "»");
     }
 
+    /**
+     * recive los resultados y los errores del reconocedor de voz
+     */
     private final RecognitionListener listener = new RecognitionListener() {
+        /**
+         * Procesa lo que escucho y si sigue activa la voz vuelve a escuchar.
+         *
+         * @param results resultado del reconocimiento (lista de frases posibles)
+         */
         @Override
         public void onResults(Bundle results) {
             ArrayList<String> frases =
                     results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             procesarComando(frases);
 
-            // Seguir escuchando (si no se detuvo al terminar el patrón)
             if (escuchando) {
                 handler.postDelayed(ContadorActivity.this::escucharUnaVez, 300);
             }
         }
 
+        /**
+         * segun sea el error detiene la voz o vuelve a escuchar
+         *
+         * @param error código de error de SpeechRecognizer
+         */
         @Override
         public void onError(int error) {
             if (!escuchando) {
@@ -403,21 +464,32 @@ public class ContadorActivity extends AppCompatActivity {
 
     // ---------------- Ciclo de vida ----------------
 
+    /**
+     * Guarda la vuelta actual para no perderla si se gira la pantalla
+     *
+     * @param outState Bundle donde se guarda el estado
+     *
+     */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("vuelta", vueltaActual);
     }
 
+    /**
+     * Si la app pasa a segundo plano suelta el microfono y devuelve el sonido
+     */
     @Override
     protected void onStop() {
         super.onStop();
-        // Si la app pasa a segundo plano: soltar el micrófono y devolver el sonido
         if (escuchando) {
             detenerEscucha();
         }
     }
 
+    /**
+     * libera el reconocedor, devuelve el sonido, apaga el hilo secundario y cierra la base de datos
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();

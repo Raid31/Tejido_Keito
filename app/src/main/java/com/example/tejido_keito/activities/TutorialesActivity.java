@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Lista de tutoriales en video. Al tocar uno abre VideoActivity.
+ */
 public class TutorialesActivity extends AppCompatActivity {
 
     private KeitoDbHelper dbHelper;
@@ -25,6 +28,14 @@ public class TutorialesActivity extends AppCompatActivity {
     // Hilo secundario para las consultas a la base de datos
     private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
+    /**
+     * Arma la lista y carga los tutoriales de la base en un hilo secundario
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,8 +60,13 @@ public class TutorialesActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Revisa que el video exista en res/raw y abre VideoActivity mandando por Intent titulo,
+     * descripcion y video.
+     *
+     * @param tutorial  tutorial que se tocó
+     */
     private void abrirVideo(Tutorial tutorial) {
-        // Comprobar que el archivo existe en res/raw
         int recurso = getResources().getIdentifier(tutorial.getVideo(), "raw", getPackageName());
         if (recurso == 0) {
             Toast.makeText(this, "Este video todavía no está disponible", Toast.LENGTH_SHORT).show();
@@ -64,6 +80,9 @@ public class TutorialesActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * Apaga el hilo secundario y cierra la base de datos.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();

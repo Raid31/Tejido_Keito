@@ -21,6 +21,10 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Muestra solo los patrones que el usuario marco con un corazon, si quita uno desaparece de la lista
+ * Las consultas se hacen en un hilo secundario
+ */
 public class FavoritosActivity extends AppCompatActivity {
 
     private KeitoDbHelper dbHelper;
@@ -33,6 +37,14 @@ public class FavoritosActivity extends AppCompatActivity {
 
     private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
+    /**
+     * Arma la lista y el corazon (aqui quita el patron de favoritos)
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,16 +80,21 @@ public class FavoritosActivity extends AppCompatActivity {
         }));
     }
 
-    // Se recarga cada vez que la pantalla vuelve a verse
+    /**
+     *  Recarga los favoritos cada vez que la pantalla vuelva a verse
+     */
     @Override
     protected void onResume() {
         super.onResume();
         cargarFavoritos();
     }
 
+    /**
+     * lee los favoritos del usuario y los patrones en un hilo secundario, deja solo los favortios y
+     * los muestra al terminar
+     */
     private void cargarFavoritos() {
         ejecutor.execute(() -> {
-            // --- Hilo secundario: consultas a la base ---
             Set<Integer> favoritos = dbHelper.obtenerFavoritosUsuario(sesion.getUsuarioId());
             List<Patron> todos = dbHelper.obtenerPatrones();
 
@@ -88,7 +105,6 @@ public class FavoritosActivity extends AppCompatActivity {
                 }
             }
 
-            // --- Hilo principal: actualizar la pantalla ---
             runOnUiThread(() -> {
                 if (isFinishing() || isDestroyed()) {
                     return;
@@ -101,7 +117,9 @@ public class FavoritosActivity extends AppCompatActivity {
         });
     }
 
-    // Muestra la lista, o el mensaje si no hay favoritos
+    /**
+     *     Muestra la lista, o el mensaje si no hay favoritos
+      */
     private void mostrarLista() {
         adapter.actualizarLista(new ArrayList<>(patronesFavoritos));
 
@@ -110,10 +128,13 @@ public class FavoritosActivity extends AppCompatActivity {
         rvFavoritos.setVisibility(vacio ? View.GONE : View.VISIBLE);
     }
 
+    /**
+     * Cierra la base de datos en el mismo hilo secundario, después de las consultas pendientes,
+     * y apaga el executor.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Cierra la base en el mismo hilo, después de las consultas pendientes
         ejecutor.execute(() -> {
             if (dbHelper != null) {
                 dbHelper.close();

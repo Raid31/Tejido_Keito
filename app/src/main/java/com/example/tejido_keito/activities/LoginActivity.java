@@ -16,6 +16,14 @@ import com.example.tejido_keito.utils.SessionManager;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
+/**
+ * Pantalla de inicio de sesion, valida el correo y la contraseña en SQLite (hilo secundario)
+ * gurda la sesion y abre la biblioteca
+ * <p>
+ *     si viene desde el registro recibe el extra de correo y lo deja escrito
+ * </p>
+ */
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etCorreo;
@@ -26,6 +34,12 @@ public class LoginActivity extends AppCompatActivity {
     // Hilo secundario para las consultas a la base de datos
     private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
+    /**
+     * Arma la pantalla del login. al tocar "entrar" revisa qie mp haya campos vacios,
+     * consulta la base con validarLogin() y si esta bien, guarda la sesion y abre la biblioteca
+     *
+     * @param savedInstanceState estado anterior de la pantalla, si lo hay (por ejemplo al girar el teléfono)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,10 +73,10 @@ public class LoginActivity extends AppCompatActivity {
             btnEntrar.setEnabled(false);
 
             ejecutor.execute(() -> {
-                // --- Hilo secundario: consultar en SQLite (devuelve el id del usuario o -1) ---
+                //Hilo secundario: consultar en SQLite (devuelve el id del usuario o -1)
                 long usuarioId = dbHelper.validarLogin(correo, contrasena);
 
-                // --- Hilo principal: reaccionar al resultado ---
+                // Hilo principal: reaccionar al resultado
                 runOnUiThread(() -> {
                     if (isFinishing() || isDestroyed()) {
                         return;
@@ -78,7 +92,7 @@ public class LoginActivity extends AppCompatActivity {
                     // Guardar la sesión para que siga abierta al cerrar la app
                     sesion.guardarSesion(usuarioId, correo);
 
-                    // Entrar a la Biblioteca y borrar las pantallas anteriores:
+                    // Entrar a la Biblioteca y borrar las pantallas anteriores
                     // así el botón Atrás no vuelve al Login
                     Intent intent = new Intent(LoginActivity.this, BibliotecaActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -94,6 +108,9 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Apaga el hilo secundario y cierra la base de datos
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();

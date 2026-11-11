@@ -23,6 +23,10 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Muestra los patrones que el usuario ya empezó, con la vuelta en que va.
+ * Desde aquí se puede continuar en el contador o quitar el avance.
+ */
 public class ProgresoActivity extends AppCompatActivity {
 
     private KeitoDbHelper dbHelper;
@@ -34,6 +38,14 @@ public class ProgresoActivity extends AppCompatActivity {
     // Hilo secundario para las consultas a la base de datos
     private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
+    /**
+     *  arma la lista y define que pasa al abrir o quitar un patron
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +72,10 @@ public class ProgresoActivity extends AppCompatActivity {
         rvProgreso.setAdapter(adapter);
     }
 
-    // Se recarga cada vez que la pantalla vuelve a verse (por ejemplo, al volver del contador)
+    /**
+     * Lee el progreso del usuario y los patrones en un hilo secundario, deja solo
+     * los que ya empezó y los muestra al terminar.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -69,7 +84,6 @@ public class ProgresoActivity extends AppCompatActivity {
 
     private void cargarProgreso() {
         ejecutor.execute(() -> {
-            // --- Hilo secundario: consultas a la base ---
             Map<Integer, Integer> progresos = dbHelper.obtenerProgresoUsuario(usuarioId);
             List<Patron> todos = dbHelper.obtenerPatrones();
 
@@ -80,7 +94,6 @@ public class ProgresoActivity extends AppCompatActivity {
                 }
             }
 
-            // --- Hilo principal: actualizar la pantalla ---
             runOnUiThread(() -> {
                 if (isFinishing() || isDestroyed()) {
                     return;
@@ -94,6 +107,11 @@ public class ProgresoActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     *  Abre el contador del patrón, mandando por Intent id, nombre, totalVueltas, abreviaciones e instrucciones.
+     *
+     * @param patron    patrón que se quiere continuar
+     */
     private void abrirContador(Patron patron) {
         Intent intent = new Intent(this, ContadorActivity.class);
         intent.putExtra("id", patron.getId());
@@ -104,6 +122,12 @@ public class ProgresoActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * Pregunta si de verdad se quiere borrar el avance y, si dice que sí, lo elimina en un
+     * hilo secundario y recarga la lista.
+     *
+     * @param patron patrón al que se le borra el avance
+     */
     private void confirmarQuitar(Patron patron) {
         new AlertDialog.Builder(this)
                 .setTitle("Quitar de mi progreso")
@@ -122,6 +146,9 @@ public class ProgresoActivity extends AppCompatActivity {
                 .show();
     }
 
+    /**
+     * Apaga el hilo secundario y cierra la base de datos.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();

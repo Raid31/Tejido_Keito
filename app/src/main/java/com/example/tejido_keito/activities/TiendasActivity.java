@@ -45,6 +45,12 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Mapa (osmdroid con OpenTopoMap) con las tiendas de lanas de Iquique y una lista ordenada por cercanía.
+ * Usa el GPS (FusedLocationProviderClient) para calcular la distancia,
+ * y el botón "Cómo llegar" abre una app de mapas con un Intent implícito.
+ *
+ */
 public class TiendasActivity extends AppCompatActivity {
 
     private KeitoDbHelper dbHelper;
@@ -62,7 +68,9 @@ public class TiendasActivity extends AppCompatActivity {
     // Hilo secundario para las consultas a la base de datos
     private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
 
-    // Pide el permiso de ubicación en tiempo de ejecución
+    /**
+     * Pide el permiso de ubicación en tiempo de ejecución.
+     */
     private final ActivityResultLauncher<String> permisoUbicacion =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), concedido -> {
                 if (concedido) {
@@ -74,7 +82,9 @@ public class TiendasActivity extends AppCompatActivity {
                 }
             });
 
-    // Recibe las posiciones del GPS
+    /**
+     *     Recibe las posiciones del GPS
+      */
     private final LocationCallback callbackUbicacion = new LocationCallback() {
         @Override
         public void onLocationResult(@NonNull LocationResult resultado) {
@@ -85,6 +95,15 @@ public class TiendasActivity extends AppCompatActivity {
         }
     };
 
+
+    /**
+     *Configura osmdroid, el mapa, la lista de tiendas y el botón de mi ubicación, carga las tiendas y pide el permiso si falta.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,6 +158,9 @@ public class TiendasActivity extends AppCompatActivity {
 
     // ---------------- Tiendas (SQLite) ----------------
 
+    /**
+     * Lee las tiendas en un hilo secundario y las muestra en la lista y en el mapa al terminar.
+     */
     private void cargarTiendas() {
         ejecutor.execute(() -> {
             List<Tienda> lista = dbHelper.obtenerTiendas();
@@ -160,7 +182,9 @@ public class TiendasActivity extends AppCompatActivity {
         });
     }
 
-    // Ordena por cercanía (si hay ubicación) y actualiza la lista
+    /**
+     *     Ordena por cercanía (si hay ubicación) y actualiza la lista
+      */
     private void mostrarTiendas() {
         if (ubicacionActual != null) {
             Collections.sort(tiendas, (a, b) -> Float.compare(distanciaMetros(a), distanciaMetros(b)));
@@ -168,6 +192,12 @@ public class TiendasActivity extends AppCompatActivity {
         adapter.actualizar(tiendas, ubicacionActual);
     }
 
+    /**
+     *  Calcula la distancia entre la ubicación actual y una tienda. Solo se llama cuando ya hay ubicación.
+     *
+     * @param tienda    tienda a la que se mide la distancia
+     * @return distancia en metros
+     */
     private float distanciaMetros(Tienda tienda) {
         float[] resultado = new float[1];
         Location.distanceBetween(ubicacionActual.getLatitude(), ubicacionActual.getLongitude(),
@@ -177,6 +207,9 @@ public class TiendasActivity extends AppCompatActivity {
 
     // ---------------- Mapa ----------------
 
+    /**
+     * Borra y vuelve a poner los marcadores de las tiendas y el del usuario.
+     */
     private void redibujarMapa() {
         mapa.getOverlays().clear();
         for (Tienda tienda : tiendas) {
@@ -194,6 +227,9 @@ public class TiendasActivity extends AppCompatActivity {
         mapa.invalidate();
     }
 
+    /**
+     * Centra el mapa en el promedio de las coordenadas de las tiendas.
+     */
     private void centrarEnTiendas() {
         if (tiendas.isEmpty()) {
             return;
@@ -208,6 +244,9 @@ public class TiendasActivity extends AppCompatActivity {
         mapa.getController().setCenter(new GeoPoint(lat / tiendas.size(), lng / tiendas.size()));
     }
 
+    /**
+     * Mueve el mapa a la ubicación del usuario. Si falta el permiso lo pide, y si aún no hay ubicación avisa y empieza a buscarla
+     */
     private void irAMiUbicacion() {
         if (!tienePermisoUbicacion()) {
             permisoUbicacion.launch(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -226,12 +265,20 @@ public class TiendasActivity extends AppCompatActivity {
 
     // ---------------- Ubicación (FusedLocationProviderClient) ----------------
 
+    /**
+     *  Revisa si el usuario ya dio el permiso de ubicación.
+     *
+     * @return true si el permiso está concedido
+     */
     private boolean tienePermisoUbicacion() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
     @SuppressLint("MissingPermission")
+    /**
+     * Pide la última ubicación conocida y luego actualizaciones periódicas del GPS (cada 10 segundos o 10 metros).
+     */
     private void iniciarActualizacionesUbicacion() {
         if (actualizandoUbicacion || !tienePermisoUbicacion()) {
             return;
@@ -252,6 +299,9 @@ public class TiendasActivity extends AppCompatActivity {
         fusedClient.requestLocationUpdates(pedido, callbackUbicacion, Looper.getMainLooper());
     }
 
+    /**
+     * Deja de pedir ubicación al GPS para no gastar batería.
+     */
     private void detenerActualizacionesUbicacion() {
         if (actualizandoUbicacion) {
             fusedClient.removeLocationUpdates(callbackUbicacion);
@@ -259,6 +309,11 @@ public class TiendasActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Guarda la ubicación nueva, mueve el marcador del usuario y recalcula distancias y orden.
+     *
+     * @param ubicacion última posición recibida del GPS
+     */
     private void nuevaUbicacion(Location ubicacion) {
         ubicacionActual = ubicacion;
 
@@ -278,6 +333,12 @@ public class TiendasActivity extends AppCompatActivity {
 
     // ---------------- Cómo llegar (Intent implícito) ----------------
 
+    /**
+     * Abre la ruta a la tienda con un Intent implícito: primero en Google Maps y, si no está, en cualquier app que entienda "geo:".
+     * Si no hay ninguna app de mapas, avisa con un Toast.
+     *
+     * @param tienda    tienda a la que se quiere llegar
+     */
     private void comoLlegar(Tienda tienda) {
         String destino = tienda.getLatitud() + "," + tienda.getLongitud();
         try {
@@ -296,6 +357,9 @@ public class TiendasActivity extends AppCompatActivity {
 
     // ---------------- Ciclo de vida ----------------
 
+    /**
+     * Reactiva el mapa y el GPS al volver a la pantalla.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -305,7 +369,9 @@ public class TiendasActivity extends AppCompatActivity {
         }
     }
 
-    // Al minimizar o salir: soltar el GPS para no gastar batería
+    /**
+     * al minimizar o salir, pausa el mapa y suelta el GPS para no gastar batería.
+     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -313,6 +379,9 @@ public class TiendasActivity extends AppCompatActivity {
         detenerActualizacionesUbicacion();
     }
 
+    /**
+     * apaga el hilo secundario, cierra la base de datos y libera el mapa
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
