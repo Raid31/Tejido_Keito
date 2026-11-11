@@ -7,6 +7,14 @@ public class Tutorial {
     private final String descripcion;
     private final String video;   // nombre del archivo en res/raw (sin extensión)
 
+    /**
+     * crear tutorial
+     *
+     * @param id            id en la base de datos
+     * @param titulo        nombre del punto o técnica
+     * @param descripcion   explicación corta
+     * @param video         nombre del archivo en res/raw (sin extensión)
+     */
     public Tutorial(int id, String titulo, String descripcion, String video) {
         this.id = id;
         this.titulo = titulo;
