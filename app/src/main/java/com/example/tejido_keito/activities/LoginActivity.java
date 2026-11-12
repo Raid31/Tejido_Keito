@@ -15,6 +15,7 @@ import com.example.tejido_keito.utils.SessionManager;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import android.view.WindowManager;
 
 
 /**
@@ -43,6 +44,8 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,  // Evita capturas de pantalla y que se vea el contenido en la lista de apps recientes
+                WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_login);
 
         dbHelper = new KeitoDbHelper(this);
