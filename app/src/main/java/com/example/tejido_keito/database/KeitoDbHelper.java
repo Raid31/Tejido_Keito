@@ -18,6 +18,7 @@ import com.example.tejido_keito.database.KeitoContract.TutorialEntry;
 import com.example.tejido_keito.models.Tutorial;
 import com.example.tejido_keito.database.KeitoContract.TiendaEntry;
 import com.example.tejido_keito.models.Tienda;
+import com.example.tejido_keito.utils.Passwordhasher;
 import com.example.tejido_keito.database.KeitoContract.FavoritoEntry;
 import java.util.HashSet;
 import java.util.Set;
@@ -280,7 +281,7 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(UsuarioEntry.COLUMN_NOMBRE, nombre);
         values.put(UsuarioEntry.COLUMN_EMAIL, email);
-        values.put(UsuarioEntry.COLUMN_PASSWORD, password);
+        values.put(UsuarioEntry.COLUMN_PASSWORD, Passwordhasher.hashear(password));
         long id = db.insert(UsuarioEntry.TABLE_NAME, null, values);
         db.close();
         return id;
@@ -296,10 +297,9 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
      */
     public long validarLogin(String email, String password) {
         SQLiteDatabase db = getReadableDatabase();
-        String[] projection = { UsuarioEntry._ID };
-        String selection = UsuarioEntry.COLUMN_EMAIL + " = ? AND " +
-                UsuarioEntry.COLUMN_PASSWORD + " = ?";
-        String[] selectionArgs = { email, password };
+        String[] projection = { UsuarioEntry._ID, UsuarioEntry.COLUMN_PASSWORD };
+        String selection = UsuarioEntry.COLUMN_EMAIL + " = ?";
+        String[] selectionArgs = { email };
 
         long idUsuario = -1;
         Cursor cursor = null;
@@ -307,7 +307,12 @@ public class KeitoDbHelper extends SQLiteOpenHelper {
             cursor = db.query(UsuarioEntry.TABLE_NAME, projection, selection,
                     selectionArgs, null, null, null);
             if (cursor.moveToFirst()) {
-                idUsuario = cursor.getLong(cursor.getColumnIndexOrThrow(UsuarioEntry._ID));
+                String guardado = cursor.getString(
+                        cursor.getColumnIndexOrThrow(UsuarioEntry.COLUMN_PASSWORD));
+                // La contraseña se compara con el hash, no se busca en el SQL
+                if (Passwordhasher.verificar(password, guardado)) {
+                    idUsuario = cursor.getLong(cursor.getColumnIndexOrThrow(UsuarioEntry._ID));
+                }
             }
         } finally {
             if (cursor != null) {
